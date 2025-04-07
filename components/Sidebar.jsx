@@ -21,25 +21,33 @@ export default function Sidebar({ user }) {
       { name: "Cài đặt tài khoản", icon: <Settings />, path: "/settings" },
     ];
 
-    if (!user) return items;
+    if (!user || !user.LoaiTK_Name) return items;
 
-    if (user.role_id === 2) {
-      items.push({ name: "Môn học đã đăng ký", icon: <Book />, path: "/student/courses" });
-      items.push({ name: "Điểm số cá nhân", icon: <BarChart2 />, path: "/student/grades" });
-      items.push({ name: "Lịch học", icon: <Users />, path: "/student/schedule" });
-    } else if (user.role_id === 3) {
-      items.push({ name: "Danh sách lớp học", icon: <Users />, path: "/teacher/classes" });
-      items.push({ name: "Chấm điểm sinh viên", icon: <BarChart2 />, path: "/teacher/grades" });
-      items.push({ name: "Lịch giảng dạy", icon: <Book />, path: "/teacher/schedule" });
-    } else if (user.role_id === 1) {
-      items.push({ name: "Quản lý tài khoản", icon: <Users />, path: "/admin/accounts" });
-      items.push({ name: "Phê duyệt điểm", icon: <BarChart2 />, path: "/admin/approval" });
-      items.push({ name: "quản lý quyền", icon: <BarChart2 />, path: "/admin/quyen" });
-      items.push({ name: "quản lý sinh viên", icon: <BarChart2 />, path: "/admin/qlsv" });
-      items.push({ name: "quản lý giảng viên", icon: <BarChart2 />, path: "/admin/qlgv" });
+    switch (user.LoaiTK_Name.toLowerCase()) {
+      case "sinh viên":
+        items.push({ name: "Môn học đã đăng ký", icon: <Book />, path: "/student/monhoc" });
+        items.push({ name: "Điểm số cá nhân", icon: <BarChart2 />, path: "/student/xemdiem" });
+        items.push({ name: "Lịch học", icon: <Users />, path: "/student/lich" });
+        break;
+      case "giảng viên":
+        items.push({ name: "Quản lý học sinh", icon: <Users />, path: "/teacher/qlhs" });
+        items.push({ name: "Chấm điểm sinh viên", icon: <BarChart2 />, path: "/teacher/diem" });
+        items.push({ name: "Thông báo", icon: <Book />, path: "/teacher/thongbao" });
+        break;
+      case "admin":
+        items.push({ name: "Quản lý tài khoản", icon: <Users />, path: "/admin/accounts" });
+        items.push({ name: "Phê duyệt điểm", icon: <BarChart2 />, path: "/admin/duyet" });
+        items.push({ name: "Quản lý quyền", icon: <BarChart2 />, path: "/admin/quyen" });
+        items.push({ name: "Quản lý sinh viên", icon: <BarChart2 />, path: "/admin/qlsv" });
+        items.push({ name: "Quản lý giảng viên", icon: <BarChart2 />, path: "/admin/qlgv" });
+        break;
+      default:
+        break;
     }
+
     return items;
   };
+
   return (
     <aside
       className={`relative bg-gray-900 text-white p-6 flex flex-col min-h-screen transition-all duration-300 

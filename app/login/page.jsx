@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -9,11 +8,14 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
+  // State lưu trữ thông tin tài khoản
   const [form, setForm] = useState({ tenTaiKhoan: "", matKhau: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  // Hàm lấy ảnh avatar động theo trạng thái nhập liệu
   const getAvatarSrc = () => {
     const length = form.tenTaiKhoan.length;
     if (showPassword) return "/showpassword.png";
@@ -24,6 +26,7 @@ export default function Login() {
     return `/textbox_user_${Math.min(length, 24)}.jpg`;
   };
 
+  // Debug: Kiểm tra field nào đang focus
   useEffect(() => {
     console.log("focusedField:", focusedField);
     console.log("Tên tài khoản length:", form.tenTaiKhoan.length);
@@ -32,55 +35,33 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+  
     try {
-      const res = await fetch("http://localhost:3001/user");
-      if (!res.ok) throw new Error("Không thể kết nối đến máy chủ!");
-  
-      const users = await res.json();
-      const user = users.find(
-        (u) => u.tenTaiKhoan === form.tenTaiKhoan && u.matKhau === form.matKhau
-      );
-  
-      if (!user) {
-        throw new Error("Sai tài khoản hoặc mật khẩu!");
-      }
-  
-      // Lưu thông tin vào localStorage
-      localStorage.setItem("user", JSON.stringify({ id: user.id, role_id: user.role_id }));
-      
-      alert("Đăng nhập thành công!");
-      router.push("/home"); // Chuyển hướng về trang chính
-    } catch (err) {
-      setError(err.message);
-    }
-    /*try {
-      const res = await fetch("https://reqres.in/api/login", {
+      const res = await fetch("http://qltruonghoc.ddns.net/Login/Authenticate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
-          //https://reqres.in/api/login
-          //https:/5148/api/auth/login
-        email : form.tenTaiKhoan,
-          password : form.matKhau
-      }),
+          TenDangNhap: form.tenTaiKhoan,
+          MatKhau: form.matKhau,
+        }),
       });
-      
-      if (!res.ok) {
-        throw new Error("Sai tài khoản hoặc mật khẩu!");
-      }
-      
+      if (!res.ok) throw new Error("Sai tài khoản hoặc mật khẩu!");
       const data = await res.json();
+      // Lưu token vào localStorage
       localStorage.setItem("token", data.token);
-      alert("Đăng nhập thành công!");
-      router.push("/home");
+      // Lưu thông tin tài khoản vào localStorage
+      localStorage.setItem("user", JSON.stringify(data.taiKhoan));
+      // Chuyển hướng sau khi đăng nhập
+      router.push(`/home`);
     } catch (err) {
-      setError("Sai tài khoản hoặc mật khẩu!");
-    } */
+      setError(err.message);
+    }
   };
-
-  return (
+  
+return (
     <div className="relative w-full h-screen flex flex-col bg-gradient-to-b from-yellow-300 to-orange-500">
       <div className="absolute inset-0 bg-cover bg-center " style={{ backgroundImage: "url('/daihoc.webp')" }}></div>
       <header className="w-full bg-red-700 text-white shadow-md py-4 px-8 flex justify-between items-center fixed top-0 z-10">

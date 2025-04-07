@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -8,50 +8,65 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
-  const [form, setForm] = useState({ tenTaiKhoan: "", matKhau: "", confirmPassword: "", hoTen: "" ,role_id:"3"});
+  const [form, setForm] = useState({ TenDangNhap: "", MatKhau: "", confirmPassword: "", HoTen: "" ,LoaiTK_Id:""});
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const router = useRouter();
 
   const getAvatarSrc = () => {
-    const tenTaikhoanLength = form.tenTaiKhoan.length;
-    const hoTenLength = form.hoTen.length;
+    const tenTaikhoanLength = form.TenDangNhap.length;
+    const hoTenLength = form.HoTen.length;
     const maxLength = Math.max(tenTaikhoanLength, hoTenLength);
     if (showPassword) return "/showpassword.png";
-    if (focusedField === "matKhau" || (form.matKhau.length > 0 && focusedField !== "tenTaiKhoan" && focusedField !== "hoTen")) 
+    if (focusedField === "MatKhau" || (form.MatKhau.length > 0 && focusedField !== "TenDangNhap" && focusedField !== "HoTen")) 
       return "/textbox_password.png";
-    if (focusedField === "comfirmPassword" || (form.matKhau.length > 0 && focusedField !== "tenTaiKhoan" && focusedField !== "hoTen")) 
+    if (focusedField === "comfirmPassword" || (form.MatKhau.length > 0 && focusedField !== "TenDangNhap" && focusedField !== "HoTen")) 
       return "/textbox_password.png";
-    if (focusedField === "tenTaiKhoan" && form.tenTaiKhoan.length === 0) return "/textbox_user_Clicked.JPG";
-    if (focusedField === "hoTen" && form.hoTen.length === 0) return "/textbox_user_Clicked.JPG";
+    if (focusedField === "TenDangNhap" && form.TenDangNhap.length === 0) return "/textbox_user_Clicked.JPG";
+    if (focusedField === "HoTen" && form.HoTen.length === 0) return "/textbox_user_Clicked.JPG";
     if (maxLength === 0) return "/debut.jpg";
     return `/textbox_user_${Math.min(maxLength, 24)}.jpg`;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.matKhau !== form.confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
-      return;
-    }
-    const res = await fetch("http://localhost:3001/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tenTaiKhoan: form.tenTaiKhoan,
-        matKhau: form.matKhau,
-        hoTen: form.hoTen,
-        role_id: form.role_id
-      }),
+  
+    console.log("Sending request with:", {
+      TenDangNhap: form.TenDangNhap,
+      MatKhau: form.MatKhau,
+      HoTen: form.HoTen,
+      LoaiTK_Id: Number(form.LoaiTK_Id)
     });
-    const data = await res.text();
-    if (res.ok) {
-      alert("Đăng ký thành công!");
-      router.push("/login");
-    } else {
-      alert(data);
+  
+    try {
+      const res = await fetch("http://qltruonghoc.ddns.net/Login/Register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          TenDangNhap: form.TenDangNhap,
+          MatKhau: form.MatKhau,
+          HoTen: form.HoTen,
+          LoaiTK_Id: parseInt(form.LoaiTK_Id, 10),
+        }),
+      });
+  
+      console.log("Response status:", res.status);
+      const data = await res.json().catch(() => null);
+      console.log("Response data:", data);
+
+  
+      if (res.ok) {
+        alert("Đăng ký thành công!");
+        router.push("/login");
+      } else {
+        alert(data);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("Có lỗi xảy ra khi gửi yêu cầu!");
     }
   };
+  
 
   return (
     <div className="relative w-full h-screen flex flex-col items-center justify-center bg-gradient-to-b from-yellow-300 to-orange-500">
@@ -72,16 +87,16 @@ export default function Register() {
           <Image src={getAvatarSrc()} alt="Avatar" width={120} height={120} className="rounded-full border-4 border-orange-600 shadow-lg"/>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Input placeholder="Tên đăng nhập" value={form.tenTaiKhoan} onChange={(e) => setForm({ ...form, tenTaiKhoan: e.target.value })} onFocus={() => setFocusedField("tenTaiKhoan")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"/>
-          <Input placeholder="Họ tên" value={form.hoTen} onChange={(e) => setForm({ ...form, hoTen: e.target.value })} onFocus={() => setFocusedField("hoTen")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"/>
+          <Input placeholder="Tên đăng nhập" value={form.TenDangNhap} onChange={(e) => setForm({ ...form, TenDangNhap: e.target.value })} onFocus={() => setFocusedField("TenDangNhap")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"/>
+          <Input placeholder="Họ tên" value={form.HoTen} onChange={(e) => setForm({ ...form, HoTen: e.target.value })} onFocus={() => setFocusedField("HoTen")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"/>
           <div className="relative">
-            <Input placeholder="Mật khẩu" type={showPassword ? "text" : "password"} value={form.matKhau} onChange={(e) => setForm({ ...form, matKhau: e.target.value })} onFocus={() => setFocusedField("matKhau")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 pr-10 focus:ring-2 focus:ring-orange-500"/>
+            <Input placeholder="Mật khẩu" type={showPassword ? "text" : "password"} value={form.MatKhau} onChange={(e) => setForm({ ...form, MatKhau: e.target.value })} onFocus={() => setFocusedField("MatKhau")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 pr-10 focus:ring-2 focus:ring-orange-500"/>
             <button type="button" className="absolute right-3 top-3 text-gray-500 hover:text-gray-700" onClick={() => setShowPassword((prev) => !prev)}>
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-          <Input placeholder="Xác nhận mật khẩu" type="password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}  onFocus={() => setFocusedField("matKhau")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"/>
-          <select value={form.role_id} onChange={(e) => setForm({ ...form, role_id: parseInt(e.target.value) })} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500">
+          <Input placeholder="Xác nhận mật khẩu" type="password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}  onFocus={() => setFocusedField("MatKhau")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"/>
+          <select value={form.LoaiTK_Id} onChange={(e) => setForm({ ...form, LoaiTK_Id: e.target.value })} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500">
             <option value={3}>Sinh viên</option>
             <option value={2}>Giảng viên</option>
           </select>

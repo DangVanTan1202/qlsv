@@ -7,48 +7,30 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 
-export default function HomePage() {
+export default function Home() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
+ 
   useEffect(() => {
-    async function fetchUserData() {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setLoading(false);
+    if (typeof window !== "undefined") {
+        // Chỉ truy cập localStorage khi đang chạy trên client
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) {
+          router.push("/login"); // Nếu chưa đăng nhập, điều hướng về login
           return;
         }
-
-        const res = await fetch("http://localhost:3001/users");
-        if (!res.ok) throw new Error("Failed to fetch user");
-
-        const users = await res.json();
-        const foundUser = users.find((u) => u.tenTaiKhoan === token);
-
-        if (foundUser) {
-          const roleRes = await fetch(`http://localhost:3001/roles/${foundUser.role_id}`);
-          const roleData = await roleRes.json();
-
-          setUser({ ...foundUser, role: roleData.name });
-          localStorage.setItem("user", JSON.stringify({ ...foundUser, role: roleData.name }));
+  
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error("Lỗi đọc dữ liệu user:", error);
+          localStorage.removeItem("user");
+          router.push("/login");
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
       }
-    }
-
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setUser(storedUser);
-      setLoading(false);
-    } else {
-      fetchUserData();
-    }
-  }, []);
+    }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -99,11 +81,6 @@ export default function HomePage() {
       image: "/thongbao.jpg",
     },
   ];
-
-  if (loading) {
-    return <p className="text-center mt-10 text-lg font-semibold">Đang tải...</p>;
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-white text-orange-800">
       <div className="flex flex-1">

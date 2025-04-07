@@ -1,16 +1,16 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
-
+import RoleListUI from "./UI";
 export default function RoleList() {
   const [user, setUser] = useState(null);
-  const [roles, setRoles] = useState([]);
-  const [chucNangs, setChucNangs] = useState([]); 
+  const [users, setUsers] = useState([]);
+  const [chucNangs, setChucNangs] = useState([]);
+  const [allFunctions, setAllFunctions] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedFunction, setSelectedFunction] = useState("");
   const router = useRouter();
 
-  // Hàm đăng xuất
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -19,129 +19,149 @@ export default function RoleList() {
   };
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (!storedUser || storedUser.role_id !== 1) {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
       router.push("/login");
       return;
     }
-    setUser(storedUser);
-    fetchRoles();
-    fetchChucNangs();
-  }, [router]);
-
-  // Fetch danh sách quyền
-  const fetchRoles = async () => {
     try {
-      const res = await fetch("http://localhost:3001/roles");
-      if (!res.ok) throw new Error("Không thể lấy dữ liệu roles");
-      const data = await res.json();
-      console.log("Fetched roles:", data); // Debug
-      setRoles(data);
-    } catch (error) {
-      console.error("Lỗi khi lấy roles:", error.message);
-    }
-  };
-
-  // Fetch danh sách chức năng
-  const fetchChucNangs = async () => {
-    try {
-      const res = await fetch("http://localhost:3001/chucNang");
-      if (!res.ok) throw new Error("Không thể lấy dữ liệu chức năng");
-      const data = await res.json();
-      console.log("Fetched chucNangs:", data); // Debug
-      setChucNangs(data);
-    } catch (error) {
-      console.error("Lỗi khi lấy chức năng:", error.message);
-    }
-  };
-
-  // Hàm cập nhật quyền
-  const updateRolePermission = async (roleId, field, value) => {
-    try {
-      const updatedRoles = roles.map((role) =>
-        role.id === roleId ? { ...role, [field]: value } : role
-      );
-      setRoles(updatedRoles);
-
-      const roleToUpdate = updatedRoles.find((role) => role.id === roleId);
-      if (!roleToUpdate) {
-        console.error("Không tìm thấy role để cập nhật");
+      const parsedUser = JSON.parse(storedUser);
+      if (parsedUser.LoaiTK_Id !== 0) {
+        router.push("/login");
         return;
       }
-
-      const res = await fetch(`http://localhost:3001/roles/${roleId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(roleToUpdate),
-      });
-
-      if (!res.ok) {
-        console.error("Lỗi cập nhật quyền:", res.statusText);
-      }
+      setUser(parsedUser);
+      fetchUsers();
+      fetchAllFunctions();
     } catch (error) {
-      console.error("Lỗi khi cập nhật quyền:", error.message);
+      console.error("Lỗi đọc dữ liệu user:", error);
+      localStorage.removeItem("user");
+      router.push("/login");
+    }
+  }, [router]);
+
+  const fetchUsers = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch("http://qltruonghoc.ddns.net/odata/Users", {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error("Lỗi khi lấy danh sách tài khoản");
+      const data = await res.json();
+      console.log("Danh sách tài khoản:", data);
+      setUsers(data.value || []);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  // Debug kiểm tra dữ liệu
-  useEffect(() => {
-    console.log("Roles:", roles);
-    console.log("ChucNangs:", chucNangs);
-  }, [roles, chucNangs]);
+  const fetchAllFunctions = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch("http://qltruonghoc.ddns.net/odata/ChucNangs", {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error("Lỗi khi lấy danh sách chức năng!");
+      const data = await res.json();
+      console.log("Danh sách chức năng từ bảng ChucNang:", data);
+      if (data.value && Array.isArray(data.value)) {
+               setAllFunctions(data.value);
+              } else {
+                console.error("Dữ liệu không đúng định dạng:", data);
+                setAllFunctions([]);
+           }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchUserFunctions = async (idUser) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch(`http://qltruonghoc.ddns.net/QuanLyTaiKhoan/GetChucNangUser?idUser=${idUser}`, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error("Lỗi khi lấy danh sách chức năng");
+      const data = await res.json();
+      console.log("Dữ liệu chức năng từ API:", data);
+        // hiển thị danh sách chưc năng của user được chọn
+       if (data.existChucNang && Array.isArray(data.existChucNang)) {
+        setChucNangs(data.existChucNang);
+      } else {
+       console.error("Dữ liệu không đúng định dạng, API trả về:", data);
+       setChucNangs([]);
+    }
+    
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUserChange = (e) => {
+    const userId = e.target.value;
+    setSelectedUser(userId);
+    console.log("Chọn tài khoản với ID:", userId);
+    if (userId) fetchUserFunctions(userId);
+    else setChucNangs([]);
+  };
+
+  const addFunctionToUser = async () => {
+    if (!selectedUser || !selectedFunction) {
+      alert("Vui lòng chọn tài khoản và chức năng!");
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) return;
+  
+    try {
+      const bodyData = {
+        IdUser: parseInt(selectedUser), // Đảm bảo gửi số
+        ListChucNang_Id: [parseInt(selectedFunction)], // Gửi mảng chứa ID
+      };
+  
+      console.log("Dữ liệu gửi đi:", JSON.stringify(bodyData));
+  
+      const res = await fetch("http://qltruonghoc.ddns.net/QuanLyTaiKhoan/ThemChucNang", {
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bodyData),
+      });
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Lỗi khi thêm chức năng!", errorData);
+        throw new Error(errorData.Message || "Lỗi không xác định");
+      }
+  
+      alert("Thêm chức năng thành công!");
+      fetchUserFunctions(selectedUser);
+    } catch (error) {
+      console.error("Lỗi:", error);
+      alert("Có lỗi xảy ra! " + error.message);
+    }
+  };
+  
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800">
-      <Sidebar user={user} className="h-auto min-h-full" />
-      <div className="flex flex-col flex-1">
-        <Header user={user} nLogout={handleLogout} />
-        <div className="p-6 bg-white shadow-md rounded-lg m-4">
-          <h2 className="text-2xl font-semibold mb-4">Quản lý quyền</h2>
-          <table className="w-full border-collapse border border-gray-300 shadow-md rounded-lg">
-            <thead>
-              <tr className="bg-gray-300 text-gray-800">
-                <th className="border p-2">Tên quyền</th>
-                <th className="border p-2">Chức năng</th>
-                <th className="border p-2">Thêm</th>
-                <th className="border p-2">Sửa</th>
-                <th className="border p-2">Xóa</th>
-                <th className="border p-2">Duyệt</th>
-                <th className="border p-2">Xem</th>
-                <th className="border p-2">Từ chối</th>
-                <th className="border p-2">Nộp</th>
-              </tr>
-            </thead>
-            <tbody>
-                  {roles.length > 0 && chucNangs.length > 0 ? (
-                    roles
-                     .filter((role) => role.name !== "Admin")
-                   .map((role) => {
-                        const chucNang = chucNangs.find((cn) => Number(cn.id) === Number(role.idChucNang)) || { name: "Không xác định" };
-                         return (
-                        <tr key={role.id} className="hover:bg-gray-100">
-                     <td className="border p-2">{role.name.trim()}</td>
-                        <td className="border p-2">{chucNang.name.trim()}</td>
-                        {["them", "sua", "xoa", "duyet", "xem", "tu_choi", "nop"].map((field) => (
-                  <td key={field} className="border p-2 text-center">
-                <input
-                  type="checkbox"
-                  checked={role[field]}
-                  onChange={(e) => updateRolePermission(role.id, field, e.target.checked)}
-                  className="w-5 h-5 cursor-pointer"
-                />
-              </td>
-            ))}
-          </tr>
-        );
-      })
-  ) : (
-    <tr>
-      <td colSpan="9" className="text-center p-4">Đang tải dữ liệu...</td>
-    </tr>
-  )}
- </tbody>
-</table>
-    </div>
-     </div>
-    </div>
+    <RoleListUI
+      user={user}
+      users={users}
+      chucNangs={chucNangs}
+      allFunctions={allFunctions}
+      selectedUser={selectedUser}
+      selectedFunction={selectedFunction}
+      handleUserChange={handleUserChange}
+      setSelectedFunction={setSelectedFunction}
+      addFunctionToUser={addFunctionToUser}
+      handleLogout={handleLogout}
+    />
   );
 }
