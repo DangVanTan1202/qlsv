@@ -18,10 +18,10 @@ export default function RoleListUI({
       <Sidebar user={user} />
       <div className="flex-1 p-6">
         <Header user={user} onLogout={handleLogout} />
-        <h2 className="text-2xl font-semibold mb-4">Quản lý chức năng</h2>
+        <h2 className="text-3xl font-extrabold text-orange-500 text-left mb-6">Quản lý chức năng</h2>
         {/* Tìm kiếm tài khoản */}
         <div className="mb-4">
-          <label className="block font-medium">Tìm tài khoản:</label>
+          <label className=" block font-medium">Tìm tài khoản:</label>
           <input
             type="text"
             list="userList"
