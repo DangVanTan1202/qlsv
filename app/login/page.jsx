@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
-
 export default function Login() {
   // State lưu trữ thông tin tài khoản
   const [form, setForm] = useState({ tenTaiKhoan: "", matKhau: "" });
@@ -14,7 +13,6 @@ export default function Login() {
   const [focusedField, setFocusedField] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-
   // Hàm lấy ảnh avatar động theo trạng thái nhập liệu
   const getAvatarSrc = () => {
     const length = form.tenTaiKhoan.length;

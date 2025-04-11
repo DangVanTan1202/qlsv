@@ -11,7 +11,6 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
- 
   useEffect(() => {
     if (typeof window !== "undefined") {
         // Chỉ truy cập localStorage khi đang chạy trên client

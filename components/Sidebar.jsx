@@ -20,9 +20,7 @@ export default function Sidebar({ user }) {
       { name: "Hướng dẫn sử dụng", icon: <Book />, path: "/guide" },
       { name: "Cài đặt tài khoản", icon: <Settings />, path: "/settings" },
     ];
-
     if (!user || !user.LoaiTK_Name) return items;
-
     switch (user.LoaiTK_Name.toLowerCase()) {
       case "sinh viên":
         items.push({ name: "Môn học đã đăng ký", icon: <Book />, path: "/student/monhoc" });
@@ -71,7 +69,7 @@ export default function Sidebar({ user }) {
           <Button
             key={item.path}
             variant="ghost"
-            className={`w-full flex items-center gap-3 text-left text-white hover:bg-gray-800 
+            className={`w-full flex items-center gap-3 text-left text-white hover:bg-red-800 
               transition-all duration-200 ${isCollapsed ? "justify-center px-0" : "px-3"}`}
             onClick={() => router.push(item.path)}
           >

@@ -1,23 +1,25 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import RoleListUI from "./UI";
+import RoleUI from "./UI";
 import {
   fetchUsers,
-  fetchAllFunctions,
-  fetchUserFunctions,
-  addFunctionToUser as addFunctionToUserService,
+  fetchLoaiTK,
+  fetchChucNangs,
+  fetchPhanQuyenLoaiTK,
+  updatePhanQuyen,
+  deletePhanQuyen,
 } from "../../service/quyenService";
 
-export default function RoleList() {
+export default function RolePage() {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
+  const [loaiTKList, setLoaiTKList] = useState([]);
+  const [selectedLoaiTK, setSelectedLoaiTK] = useState("");
   const [chucNangs, setChucNangs] = useState([]);
-  const [allFunctions, setAllFunctions] = useState([]);
-  const [selectedUser, setSelectedUser] = useState("");
-  const [selectedFunction, setSelectedFunction] = useState("");
+  const [phanQuyenList, setPhanQuyenList] = useState([]);
   const router = useRouter();
-
+  const [loading, setLoading] = useState(true);
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -33,54 +35,70 @@ export default function RoleList() {
     }
     try {
       const parsedUser = JSON.parse(storedUser);
-      if (parsedUser.LoaiTK_Id !== 0) {
+      if (parsedUser.LoaiTK_Name!== "Admin") {
         router.push("/login");
         return;
       }
       setUser(parsedUser);
       const token = localStorage.getItem("token");
       fetchUsers(token, setUsers);
-      fetchAllFunctions(token, setAllFunctions);
     } catch (error) {
       console.error("Lỗi đọc dữ liệu user:", error);
       localStorage.removeItem("user");
       router.push("/login");
     }
   }, [router]);
+  useEffect(() => {
+    fetchLoaiTK(setLoaiTKList);
+    fetchChucNangs(setChucNangs);
+  }, []);
 
-  const handleUserChange = (e) => {
-    const userId = e.target.value;
-    setSelectedUser(userId);
-    console.log("Chọn tài khoản với ID:", userId);
-    if (userId) {
-      const token = localStorage.getItem("token");
-      fetchUserFunctions(userId, token, setChucNangs);
+  useEffect(() => {
+    if (selectedLoaiTK) {
+      fetchPhanQuyenLoaiTK(selectedLoaiTK, setPhanQuyenList);
     } else {
-      setChucNangs([]);
+      setPhanQuyenList([]);
     }
-  };
+  }, [selectedLoaiTK]);
 
-  const addFunctionToUser = async () => {
-    const token = localStorage.getItem("token");
-    await addFunctionToUserService({
-      selectedUser,
-      selectedFunction,
-      token,
-      fetchUserFunctions: (id) => fetchUserFunctions(id, token, setChucNangs),
-    });
+  const handlePermissionChange = async ({ chucNangId, permission, value }) => {
+    const loaiTKId = parseInt(selectedLoaiTK);
+    const existing = phanQuyenList.find(
+      (pq) => pq.IdChucNang === chucNangId && pq.IdLoaiTK === loaiTKId
+    );
+    if (permission === "DELETE_ALL" && existing?.Id) {
+      await deletePhanQuyen(existing.Id);
+    } else {
+      const updatedQuyen = {
+        Id: existing?.Id,
+        IdChucNang: chucNangId,
+        IdLoaiTK: loaiTKId,
+        Them: existing?.Them ?? false,
+        Sua: existing?.Sua ?? false,
+        Xoa: existing?.Xoa ?? false,
+        Duyet: existing?.Duyet ?? false,
+        Xem: existing?.Xem ?? false,
+        TuChoi: existing?.TuChoi ?? false,
+        Nop: existing?.Nop ?? false,
+      };
+      updatedQuyen[permission] = value;
+
+      await updatePhanQuyen(updatedQuyen);
+    }
+
+    fetchPhanQuyenLoaiTK(loaiTKId, setPhanQuyenList);
   };
 
   return (
-    <RoleListUI
+    <RoleUI
       user={user}
       users={users}
+      loaiTKList={loaiTKList}
+      selectedLoaiTK={selectedLoaiTK}
+      setSelectedLoaiTK={setSelectedLoaiTK}
       chucNangs={chucNangs}
-      allFunctions={allFunctions}
-      selectedUser={selectedUser}
-      selectedFunction={selectedFunction}
-      handleUserChange={handleUserChange}
-      setSelectedFunction={setSelectedFunction}
-      addFunctionToUser={addFunctionToUser}
+      phanQuyenList={phanQuyenList}
+      onPermissionChange={handlePermissionChange}
       handleLogout={handleLogout}
     />
   );

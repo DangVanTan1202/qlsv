@@ -1,124 +1,171 @@
 "use client";
+
+import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
-export default function RoleListUI({
+export default function RoleUI({
   user,
   users,
-  chucNangs,
-  allFunctions,
-  selectedUser,
-  selectedFunction,
-  handleUserChange,
-  setSelectedFunction,
-  addFunctionToUser,
   handleLogout,
+  loaiTKList,
+  selectedLoaiTK,
+  setSelectedLoaiTK,
+  chucNangs,
+  phanQuyenList,
+  onPermissionChange
 }) {
-  return (
-    <div className="flex min-h-screen bg-gray-100 text-gray-800">
-      <Sidebar user={user} />
-      <div className="flex-1 p-6">
-        <Header user={user} onLogout={handleLogout} />
-        <h2 className="text-3xl font-extrabold text-orange-500 text-left mb-6">Quản lý chức năng</h2>
-        {/* Tìm kiếm tài khoản */}
-        <div className="mb-4">
-          <label className=" block font-medium">Tìm tài khoản:</label>
-          <input
-            type="text"
-            list="userList"
-            className="border p-2 rounded w-full"
-            placeholder="Nhập tên tài khoản hoặc họ tên..."
-            onChange={(e) => {
-              const selected = users.find(
-                (u) => `${u.tenTaiKhoan} (${u.hoTen})` === e.target.value
-              );
-              if (selected) {
-                handleUserChange({ target: { value: selected.id } });
-              }
-            }}
-          />
-          <datalist id="userList">
-            {users.map((user) => (
-              <option
-                key={user.id}
-                value={`${user.tenTaiKhoan} (${user.hoTen})`}
-              />
-            ))}
-          </datalist>
-        </div>
+  const [selectedChucNangToAdd, setSelectedChucNangToAdd] = useState("");
 
-        {/* Dropdown chọn chức năng */}
-        <div className="mb-4">
-          <label className="block font-medium">Chọn chức năng:</label>
+  const getQuyen = (chucNangId) =>
+    phanQuyenList.find((pq) => pq.IdChucNang === chucNangId) || {};
+
+  const permissions = [
+    { label: "Thêm", key: "Them" },
+    { label: "Sửa", key: "Sua" },
+    { label: "Xóa", key: "Xoa" },
+    { label: "Duyệt", key: "Duyet" },
+    { label: "Xem", key: "Xem" },
+    { label: "Từ chối", key: "TuChoi" },
+    { label: "Nộp", key: "Nop" }
+  ];
+
+  const chucNangsDaPhanQuyen = phanQuyenList.map((pq) => pq.IdChucNang);
+  const chucNangsChuaPhanQuyen = chucNangs.filter(
+    (cn) => !chucNangsDaPhanQuyen.includes(cn.id)
+  );
+
+  const handleAddChucNang = () => {
+    if (selectedChucNangToAdd) {
+      onPermissionChange({
+        chucNangId: parseInt(selectedChucNangToAdd),
+        permission: "Xem", // Quyền mặc định khi thêm mới
+        value: true,
+      });
+      setSelectedChucNangToAdd("");
+    }
+  };
+
+  const handleRemoveChucNang = (chucNangId) => {
+    onPermissionChange({
+      chucNangId,
+      permission: "DELETE_ALL",
+      value: false
+    });
+  };
+  
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 text-gray-800 font-sans">
+    <Sidebar user={user} />
+    <div className="flex-1 px-8 py-6">
+      <Header user={user} onLogout={handleLogout} />
+  
+      <div className="mt-6">
+        <h2 className="text-3xl font-semibold text-orange-600 mb-6">
+          Phân quyền theo loại tài khoản
+        </h2>
+  
+        <div className="mb-8">
+          <label className="block text-base font-medium mb-2 text-gray-700">
+            Chọn loại tài khoản:
+          </label>
           <select
-            className="border p-2 rounded w-full"
-            value={selectedFunction}
-            onChange={(e) => setSelectedFunction(e.target.value)}
+            className="p-3 border border-orange-300 rounded-md w-full bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+            value={selectedLoaiTK}
+            onChange={(e) => setSelectedLoaiTK(e.target.value)}
           >
-            <option value="">-- Chọn chức năng --</option>
-            {Array.isArray(allFunctions) &&
-              allFunctions.map((chucNang) => (
-                <option key={chucNang.id} value={chucNang.id}>
-                  {chucNang.tenChucNang} {chucNang.name}
-                </option>
-              ))}
+            <option value="">-- Chọn loại tài khoản --</option>
+            {loaiTKList.map((tk) => (
+              <option key={tk.Id} value={tk.Id}>
+                {tk.Name}
+              </option>
+            ))}
           </select>
         </div>
-
-        {/* Nút Thêm chức năng */}
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={addFunctionToUser}
-        >
-          Thêm chức năng
-        </button>
-        {/* Bảng danh sách chức năng của user */}
-        {selectedUser && chucNangs.length > 0 && (
+  
+        {selectedLoaiTK && (
           <>
-            <h3 className="text-xl font-semibold mt-6 mb-2">
-              Danh sách chức năng
-            </h3>
-            <table className="w-full border-collapse border border-gray-300 shadow-md rounded-lg">
+            <table className="w-full text-sm border-separate border-spacing-y-2">
               <thead>
-                <tr className="bg-gray-300 text-gray-800">
-                  <th className="border p-2">Tên Chức Năng</th>
-                  {["them", "sua", "xoa", "duyet", "xem", "tu_choi", "nop"].map(
-                    (perm) => (
-                      <th key={perm} className="border p-2 capitalize">
-                        {perm.replace("_", " ")}
-                      </th>
-                    )
-                  )}
+                <tr className="bg-orange-100 text-orange-700 rounded-md">
+                  <th className="p-3 text-left">Chức năng</th>
+                  {permissions.map((perm) => (
+                    <th key={perm.key} className="p-3 text-center">{perm.label}</th>
+                  ))}
+                  <th className="p-3 text-center">Xoá chức năng</th>
                 </tr>
               </thead>
               <tbody>
-                {chucNangs.map((chucNang) => (
-                  <tr key={chucNang.Id} className="hover:bg-gray-100">
-                    <td className="border p-2">{chucNang.Name}</td>
-                    {[
-                      "them",
-                      "sua",
-                      "xoa",
-                      "duyet",
-                      "xem",
-                      "tu_choi",
-                      "nop",
-                    ].map((perm) => (
-                      <td key={perm} className="border p-2 text-center">
-                        <input
-                          type="checkbox"
-                          checked={chucNang.Role?.[perm] === true}
-                          readOnly
-                          className="w-5 h-5 cursor-pointer"
-                        />
+                {phanQuyenList.map((pq) => {
+                  const chucNang = chucNangs.find((cn) => cn.id === pq.IdChucNang);
+                  return (
+                    <tr
+                      key={pq.IdChucNang}
+                      className="bg-white shadow-sm hover:shadow-md transition duration-150 rounded"
+                    >
+                      <td className="p-3">{chucNang?.name}</td>
+                      {permissions.map((perm) => (
+                        <td key={perm.key} className="p-3 text-center">
+                          <input
+                            type="checkbox"
+                            checked={pq[perm.key] === true}
+                            onChange={(e) =>
+                              onPermissionChange({
+                                chucNangId: pq.IdChucNang,
+                                permission: perm.key,
+                                value: e.target.checked,
+                              })
+                            }
+                            className="w-5 h-5 accent-orange-500 cursor-pointer"
+                          />
+                        </td>
+                      ))}
+                      <td className="p-3 text-center">
+                        <button
+                          className="text-red-600 hover:underline transition"
+                          onClick={() => handleRemoveChucNang(pq.IdChucNang)}
+                        >
+                          Xoá
+                        </button>
                       </td>
-                    ))}
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+  
+            {chucNangsChuaPhanQuyen.length > 0 && (
+              <div className="mt-8">
+                <label className="block text-base font-semibold text-gray-700 mb-2">
+                  Thêm chức năng mới:
+                </label>
+                <div className="flex gap-4 items-center">
+                  <select
+                    className="p-3 border border-orange-300 rounded-md bg-white text-gray-700 focus:ring-2 focus:ring-orange-400 transition"
+                    value={selectedChucNangToAdd}
+                    onChange={(e) => setSelectedChucNangToAdd(e.target.value)}
+                  >
+                    <option value="">-- Chọn chức năng --</option>
+                    {chucNangsChuaPhanQuyen.map((cn) => (
+                      <option key={cn.id} value={cn.id}>
+                        {cn.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="bg-orange-500 text-white px-5 py-2 rounded-md hover:bg-orange-600 transition font-medium"
+                    onClick={handleAddChucNang}
+                  >
+                    Thêm
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
     </div>
+  </div>
+  
   );
 }
