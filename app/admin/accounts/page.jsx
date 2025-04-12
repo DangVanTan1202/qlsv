@@ -6,7 +6,6 @@ import AccountManagerUI from "./UI";
 
 export default function AccountPage() {
   const [users, setUsers] = useState([]);
-
   useEffect(() => {
     fetchUsers().then(setUsers);
   }, []);
