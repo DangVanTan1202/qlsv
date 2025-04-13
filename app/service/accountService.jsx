@@ -66,34 +66,34 @@ export async function fetchLoaiTKs() {
     }
   }
   // Cập nhật thông tin người dùng
-  export async function updateUser(userId, updatedData) {
-    try {
-      const res = await fetch(`http://qltruonghoc.ddns.net/odata/Users(${userId})`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
-  
-      if (!res.ok) {
-        throw new Error("Lỗi khi cập nhật tài khoản");
-      }
-  
-      // Nếu response có body thì mới parse JSON, còn không thì return success status
-      if (res.status === 204) {
-        return { success: true }; // Không có nội dung trả về
-      }
-  
-      const data = await res.json(); // Gọi json() nếu có nội dung
-      return data;
-    } catch (error) {
-      console.error("Lỗi updateUser:", error);
-      throw error;
+export async function updateUser(userId, updatedData) {
+  try {
+    const res = await fetch(`http://qltruonghoc.ddns.net/odata/Users(${userId})`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    if (!res.ok) {
+      throw new Error("Lỗi khi cập nhật tài khoản");
     }
+
+    // Nếu response có body thì mới parse JSON, còn không thì return success status
+    if (res.status === 204) {
+      return { success: true }; // Không có nội dung trả về
+    }
+
+    const data = await res.json(); // Gọi json() nếu có nội dung
+    return data;
+  } catch (error) {
+    console.error("Lỗi updateUser:", error);
+    throw error;
   }
-  
+}
+
 // Xoá người dùng
 export async function deleteUser(userId) {
   try {

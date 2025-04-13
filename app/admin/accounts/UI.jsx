@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+
 import { useState, useEffect } from "react";
 import {
   fetchLoaiTKs,
@@ -12,41 +12,13 @@ import {
 import { Edit, Trash2, PlusCircle } from "lucide-react"; // Import icons from lucide-react
 
 export default function AccountManagerUI({ users }) {
-  const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [loaiTKList, setLoaiTKList] = useState([]);
   const [phanQuyenMap, setPhanQuyenMap] = useState({});
   const [chucNangs, setChucNangs] = useState([]);
   const [editUser, setEditUser] = useState(null);
-  const router = useRouter();
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    router.push("/login");
-  };
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      router.push("/login");
-      return;
-    }
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      if (parsedUser.LoaiTK_Name!== "Admin") {
-        router.push("/login");
-        return;
-      }
-      setUser(parsedUser);
-      const token = localStorage.getItem("token");
-      fetchUsers(token, setUsers);
-    } catch (error) {
-      console.error("Lỗi đọc dữ liệu user:", error);
-      localStorage.removeItem("user");
-      router.push("/login");
-    }
-  }, [router]);
+
   useEffect(() => {
     const userFromStorage = localStorage.getItem("user");
     if (userFromStorage) {
@@ -119,10 +91,6 @@ export default function AccountManagerUI({ users }) {
   const canThem = getQuyen(currentLoaiTK, "QLTK", "them");
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-800 font-sans">
-    <Sidebar user={user} />
-    <div className="flex-1 px-8 py-6">
-      <Header user={user} onLogout={handleLogout} />
     <div className="p-8 space-y-6 bg-base-100 text-base-content">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-orange-600">
@@ -285,8 +253,6 @@ export default function AccountManagerUI({ users }) {
           </div>
         </div>
       )}
-    </div>
-    </div>
     </div>
   );
 }
