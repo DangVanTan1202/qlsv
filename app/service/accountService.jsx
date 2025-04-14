@@ -16,6 +16,7 @@ export async function fetchUsers() {
     });
     if (!res.ok) throw new Error("Lỗi khi lấy danh sách tài khoản");
     const data = await res.json();
+    console.log(data);
     return data.value || [];
   } catch (error) {
     console.error("Lỗi fetch Users:", error);
@@ -86,7 +87,9 @@ export async function updateUser(userId, updatedData) {
       return { success: true }; // Không có nội dung trả về
     }
 
-    const data = await res.json(); // Gọi json() nếu có nội dung
+    const data = await res.json();
+    console.log("➡️ Payload gửi khi cập nhật:", updatedData);
+
     return data;
   } catch (error) {
     console.error("Lỗi updateUser:", error);
@@ -124,12 +127,13 @@ export async function createUser(newUser) {
       },
       body: JSON.stringify(newUser),
     });
-
+    
     if (!res.ok) {
       throw new Error("Lỗi khi tạo tài khoản");
     }
 
     const data = await res.json();
+    console.log("➡️ Payload gửi khi tạo:", newUser);
     return data;
   } catch (error) {
     console.error("Lỗi createUser:", error);

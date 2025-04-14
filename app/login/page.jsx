@@ -76,9 +76,9 @@ return (
             </div>
             {error && <p className="text-red-500 text-center">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-6">
-              <Input placeholder="Tên đăng nhập" value={form.tenTaiKhoan} onChange={(e) => setForm({ ...form, tenTaiKhoan: e.target.value })} onFocus={() => setFocusedField("tenTaiKhoan")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500" />
+              <Input placeholder="Tên đăng nhập" value={form.tenTaiKhoan} onChange={(e) => setForm({ ...form, tenTaiKhoan: e.target.value })} onFocus={() => setFocusedField("tenTaiKhoan")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"  autoComplete="username"/>
               <div className="relative">
-                <Input placeholder="Mật khẩu" type={showPassword ? "text" : "password"} value={form.matKhau} onChange={(e) => setForm({ ...form, matKhau: e.target.value })} onFocus={() => setFocusedField("matKhau")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 pr-10 focus:ring-2 focus:ring-orange-500" />
+                <Input placeholder="Mật khẩu" type={showPassword ? "text" : "password"} value={form.matKhau} onChange={(e) => setForm({ ...form, matKhau: e.target.value })} onFocus={() => setFocusedField("matKhau")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 pr-10 focus:ring-2 focus:ring-orange-500"   autoComplete="current-password" />
                 <button type="button" className="absolute right-3 top-3 text-gray-500 hover:text-gray-700" onClick={() => setShowPassword((prev) => !prev)}>
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
