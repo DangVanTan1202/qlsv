@@ -3,20 +3,20 @@ import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import toast from "react-hot-toast";
+
 export default function AccountUI({
   user,
   handleLogout,
   users,
   loaiTKs,
   phanQuyen,
-  selectedLoaiTKId,
-  setSelectedLoaiTKId,
   onSaveUser,
   onDeleteUser,
   loading,
 }) {
+  console.log("Phân quyền hiện tại:", phanQuyen);
   const [editingUser, setEditingUser] = useState(null);
-const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const getQuyenTheoLoaiTK = (quyen) => {
     if (!phanQuyen) return false;
     return phanQuyen.some((q) => q[quyen]);
@@ -42,6 +42,10 @@ const [searchTerm, setSearchTerm] = useState("");
     setEditingUser(null);
   };
 
+  // Lọc danh sách tài khoản theo tên tài khoản
+  const filteredUsers = users.filter((u) =>
+    u.tenTaiKhoan.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800 font-sans">
       <Sidebar user={user} />
@@ -51,86 +55,74 @@ const [searchTerm, setSearchTerm] = useState("");
           Quản lý tài khoản
         </h2>
 
+        {/* Ô tìm kiếm */}
         <div className="mb-4">
-          <label className="block mb-1 font-medium">Chọn loại tài khoản:</label>
-          <select
+          <label className="block mb-1 font-medium">Tìm kiếm tài khoản:</label>
+          <input
+            type="text"
             className="p-2 border rounded w-full"
-            value={selectedLoaiTKId}
-            onChange={(e) => setSelectedLoaiTKId(e.target.value)}
-          >
-            <option value="">-- Chọn loại --</option>
-            {loaiTKs.map((l) => (
-              <option key={l.Id} value={l.Id}>
-                {l.Name}
-              </option>
-            ))}
-          </select>
+            placeholder="Nhập tên tài khoản cần tìm..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        {selectedLoaiTKId && (
-          <div className="overflow-auto">
-            <button
-              className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 mb-4"
-              onClick={() => setEditingUser({})}
-            >
-              Thêm tài khoản
-            </button>
-            <table className="w-full bg-white shadow rounded overflow-hidden">
-              <thead>
-                <tr className="bg-orange-100 text-orange-700">
-                  <th className="p-3 text-left">Tên tài khoản</th>
-                  <th className="p-3 text-left">Họ tên</th>
-                  <th className="p-3 text-left">Loại tài khoản</th>
-                  {getQuyenTheoLoaiTK("Sua") && <th className="p-3">Sửa</th>}
-                  {getQuyenTheoLoaiTK("Xoa") && <th className="p-3">Xóa</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {users
-                  .filter((u) => u.LoaiTK_Id == selectedLoaiTKId)
-                  .map((u) => {
-                    console.log(
-                      "TenTaiKhoan: ",
-                      u.tenTaiKhoan,
-                      "HoTen: ",
-                      u.hoTen
-                    );
-                    return (
-                      <tr key={u.id} className="hover:bg-gray-50">
-                        <td className="p-3">{u.tenTaiKhoan}</td>
-                        <td className="p-3">{u.hoTen}</td>
-                        <td className="p-3">
-                          {loaiTKs.find((l) => l.Id === u.LoaiTK_Id)?.Name}
-                        </td>
-                        {getQuyenTheoLoaiTK("Sua") && (
-                          <td className="p-3 text-center">
-                            <button
-                              onClick={() => openEdit(u)}
-                              className="text-blue-600 hover:underline"
-                            >
-                              Sửa
-                            </button>
-                          </td>
-                        )}
-                        {getQuyenTheoLoaiTK("Xoa") && (
-                          <td className="p-3 text-center">
-                            <button
-                              onClick={() => {
-                                onDeleteUser(u.id);
-                                toast.success("Xóa thành công");
-                              }}
-                              className="text-red-600 hover:underline"
-                            >
-                              Xóa
-                            </button>
-                          </td>
-                        )}
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
-        )}
+
+        {/* Danh sách tài khoản */}
+        <div className="overflow-auto">
+          <button
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 mb-4"
+            onClick={() => setEditingUser({})}
+          >
+            Thêm tài khoản
+          </button>
+          <table className="w-full bg-white shadow rounded overflow-hidden">
+            <thead>
+              <tr className="bg-orange-100 text-orange-700">
+                <th className="p-3 text-left">Tên tài khoản</th>
+                <th className="p-3 text-left">Họ tên</th>
+                <th className="p-3 text-left">Loại tài khoản</th>
+               <th className="p-3">Sửa</th>
+                <th className="p-3">Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((u) => {
+                return (
+                  <tr key={u.id} className="hover:bg-gray-50">
+                    <td className="p-3">{u.tenTaiKhoan}</td>
+                    <td className="p-3">{u.hoTen}</td>
+                    <td className="p-3">
+                      {loaiTKs.find((l) => l.Id === u.LoaiTK_Id)?.Name}
+                    </td>
+                
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => openEdit(u)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Sửa
+                        </button>
+                      </td>
+                  
+                    
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => {
+                            onDeleteUser(u.id);
+                            toast.success("Xóa thành công");
+                          }}
+                          className="text-red-600 hover:underline"
+                        >
+                          Xóa
+                        </button>
+                      </td>
+                    
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
         {/* Modal Form */}
         {editingUser !== null && (

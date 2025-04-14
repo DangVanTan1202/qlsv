@@ -73,7 +73,6 @@ export const updatePhanQuyen = async (quyen) => {
       },
       body: JSON.stringify(quyen)
     });
-
     if (!res.ok) {
       const errorData = await res.text();
       throw new Error(`Lỗi: ${errorData}`);
