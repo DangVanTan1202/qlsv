@@ -8,11 +8,9 @@ import { Home, Bell, Settings, Book, Users, BarChart2, ChevronLeft, ChevronRight
 export default function Sidebar({ user }) {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
-
   const getMenuItems = () => {
     let items = [
       { name: "Trang chủ", icon: <Home />, path: "/home" },
@@ -28,7 +26,7 @@ export default function Sidebar({ user }) {
         items.push({ name: "Lịch học", icon: <Users />, path: "/student/lich" });
         break;
       case "giảng viên":
-        items.push({ name: "Quản lý học sinh", icon: <Users />, path: "/teacher/qlhs" });
+        items.push({ name: "Quản lý sinh viên", icon: <Users />, path: "/teacher/qlsv" });
         items.push({ name: "Chấm điểm sinh viên", icon: <BarChart2 />, path: "/teacher/diem" });
         items.push({ name: "Thông báo", icon: <Book />, path: "/teacher/thongbao" });
         break;
@@ -42,7 +40,6 @@ export default function Sidebar({ user }) {
       default:
         break;
     }
-
     return items;
   };
 

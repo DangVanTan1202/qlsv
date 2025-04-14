@@ -46,7 +46,7 @@ export default function Register() {
           TenDangNhap: form.TenDangNhap,
           MatKhau: form.MatKhau,
           HoTen: form.HoTen,
-          LoaiTK_Id: parseInt(form.LoaiTK_Id, 10),
+          LoaiTK_Id: parseInt(form.LoaiTK_Id),
         }),
       });
   
@@ -97,8 +97,8 @@ export default function Register() {
           </div>
           <Input placeholder="Xác nhận mật khẩu" type="password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}  onFocus={() => setFocusedField("MatKhau")} onBlur={() => setFocusedField("")} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"/>
           <select value={form.LoaiTK_Id} onChange={(e) => setForm({ ...form, LoaiTK_Id: e.target.value })} className="w-full bg-white border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500">
-            <option value={3}>Sinh viên</option>
-            <option value={2}>Giảng viên</option>
+            <option value={2}>Sinh viên</option>
+            <option value={1}>Giảng viên</option>
           </select>
           <motion.div whileTap={{ scale: 0.95 }}>
             <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-semibold shadow-md">Đăng Ký</Button>

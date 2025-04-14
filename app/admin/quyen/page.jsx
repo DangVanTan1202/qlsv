@@ -12,6 +12,7 @@ import {
 } from "../../service/quyenService";
 
 export default function RolePage() {
+
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [loaiTKList, setLoaiTKList] = useState([]);
@@ -26,7 +27,6 @@ export default function RolePage() {
     setUser(null);
     router.push("/login");
   };
-
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -47,7 +47,7 @@ export default function RolePage() {
       localStorage.removeItem("user");
       router.push("/login");
     }
-  }, [router]);
+  }, [router]); 
   useEffect(() => {
     fetchLoaiTK(setLoaiTKList);
     fetchChucNangs(setChucNangs);

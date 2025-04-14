@@ -24,7 +24,7 @@ export const fetchLoaiTK = async (setLoaiTKList) => {
   try {
     const res = await fetch("http://qltruonghoc.ddns.net/odata/DM_LoaiTK");
     const data = await res.json();
-    const filtered = (data.value || []).filter(item => item.Name !== "");//loại bỏ admin khỏi combobox phân chức năng 
+    const filtered = (data.value || []).filter(item => item.Name !== "");
     setLoaiTKList(filtered);
   } catch (error) {
     console.error("Lỗi fetch loại tài khoản:", error);

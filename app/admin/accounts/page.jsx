@@ -8,7 +8,7 @@ import {
   fetchPhanQuyenLoaiTK,
   updateUser,
   deleteUser,
-  createUser
+  createUser,
 } from "../../service/accountService";
 
 export default function AccountPage() {
@@ -16,7 +16,6 @@ export default function AccountPage() {
   const [users, setUsers] = useState([]);
   const [loaiTKs, setLoaiTKs] = useState([]);
   const [phanQuyen, setPhanQuyen] = useState([]);
-  const [selectedLoaiTKId, setSelectedLoaiTKId] = useState("");
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -38,27 +37,21 @@ export default function AccountPage() {
       return;
     }
     setUser(parsedUser);
-    loadData();
+    loadData(parsedUser.LoaiTK_Id);
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (loaiTKId) => {
     setLoading(true);
-    const [userList, loaiList] = await Promise.all([
+    const [userList, loaiList, phanQuyenList] = await Promise.all([
       fetchUsers(),
-      fetchLoaiTKs()
+      fetchLoaiTKs(),
+      fetchPhanQuyenLoaiTK(loaiTKId),
     ]);
     setUsers(userList);
     setLoaiTKs(loaiList);
+    setPhanQuyen(phanQuyenList);
     setLoading(false);
   };
-
-  useEffect(() => {
-    if (selectedLoaiTKId) {
-      fetchPhanQuyenLoaiTK(selectedLoaiTKId).then(setPhanQuyen);
-    } else {
-      setPhanQuyen([]);
-    }
-  }, [selectedLoaiTKId]);
 
   const handleCreateOrUpdateUser = async (data, isEdit = false) => {
     if (isEdit) {
@@ -66,12 +59,12 @@ export default function AccountPage() {
     } else {
       await createUser(data);
     }
-    loadData();
+    loadData(user.LoaiTK_Id);
   };
 
   const handleDeleteUser = async (userId) => {
     await deleteUser(userId);
-    loadData();
+    loadData(user.LoaiTK_Id);
   };
 
   return (
@@ -81,8 +74,6 @@ export default function AccountPage() {
       users={users}
       loaiTKs={loaiTKs}
       phanQuyen={phanQuyen}
-      selectedLoaiTKId={selectedLoaiTKId}
-      setSelectedLoaiTKId={setSelectedLoaiTKId}
       onSaveUser={handleCreateOrUpdateUser}
       onDeleteUser={handleDeleteUser}
       loading={loading}
