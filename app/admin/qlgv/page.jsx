@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import GiangVienUI from "./UI";
 import {
@@ -11,16 +12,38 @@ import {
   deleteGiangVien,
 } from "../../service/giangVienService";
 export default function Page() {
+  const [user, setUser] = useState(null);
   const [giangViens, setGiangViens] = useState([]);
   const [users, setUsers] = useState([]);
   const [lopHocs, setLopHocs] = useState([]);
   const [monHocs, setMonHocs] = useState([]);
+  const router = useRouter();
   const [permissions, setPermissions] = useState({
     Them: false,
     Sua: false,
     Xoa: false,
     Xem: false,
   });
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/login");
+  };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      router.push("/login");
+      return;
+    }
+    const parsedUser = JSON.parse(storedUser);
+    if (parsedUser.LoaiTK_Name !== "Admin") {
+      router.push("/login");
+      return;
+    }
+    setUser(parsedUser);
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       await fetchGiangViensClient(setGiangViens);
@@ -57,6 +80,8 @@ export default function Page() {
 
   return (
     <GiangVienUI
+      user={user}
+      handleLogout={handleLogout}
       data={giangViens}
       users={users}
       lopHocs={lopHocs}

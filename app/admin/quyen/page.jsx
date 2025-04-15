@@ -12,7 +12,6 @@ import {
 } from "../../service/quyenService";
 
 export default function RolePage() {
-
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [loaiTKList, setLoaiTKList] = useState([]);
