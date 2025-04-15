@@ -1,21 +1,27 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AccountUI from "./UI";
 import {
   fetchUsers,
-  fetchLoaiTKs,
-  fetchPhanQuyenLoaiTK,
-  updateUser,
+  fetchLoaiTaiKhoans,
+  fetchPhanQuyenByLoaiTK,
+  fetchChucNangs,
   deleteUser,
-  createUser,
 } from "../../service/accountService";
-export default function AccountPage() {
+
+export default function Page() {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
-  const [loaiTKs, setLoaiTKs] = useState([]);
-  const [phanQuyen, setPhanQuyen] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loaiTaiKhoans, setLoaiTaiKhoans] = useState([]);
+  const [permissions, setPermissions] = useState({
+    Them: false,
+    Sua: false,
+    Xoa: false,
+    Xem: false,
+  });
+
   const router = useRouter();
 
   const handleLogout = () => {
@@ -30,52 +36,59 @@ export default function AccountPage() {
       router.push("/login");
       return;
     }
+
     const parsedUser = JSON.parse(storedUser);
     if (parsedUser.LoaiTK_Name !== "Admin") {
       router.push("/login");
       return;
     }
+
     setUser(parsedUser);
-    loadData(parsedUser.LoaiTK_Id);
   }, []);
 
-  const loadData = async (loaiTKId) => {
-    setLoading(true);
-    const [userList, loaiList, phanQuyenList] = await Promise.all([
-      fetchUsers(),
-      fetchLoaiTKs(),
-      fetchPhanQuyenLoaiTK(loaiTKId),
-    ]);
-    setUsers(userList);
-    setLoaiTKs(loaiList);
-    setPhanQuyen(phanQuyenList);
-    setLoading(false);
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchUsers(setUsers);
+      await fetchLoaiTaiKhoans(setLoaiTaiKhoans);
 
-  const handleCreateOrUpdateUser = async (data, isEdit = false) => {
-    if (isEdit) {
-      await updateUser(data.id, data);
-    } else {
-      await createUser(data);
-    }
-    loadData(user.LoaiTK_Id);
-  };
+      const quyenData = await new Promise((resolve) => {
+        fetchPhanQuyenByLoaiTK(0, resolve); // Admin
+      });
 
-  const handleDeleteUser = async (userId) => {
-    await deleteUser(userId);
-    loadData(user.LoaiTK_Id);
+      const chucNangsData = await new Promise((resolve) => {
+        fetchChucNangs(resolve);
+      });
+
+      const QLTaiKhoanId = chucNangsData.find((c) => c.code === "QLTK")?.id; // 👈 code của chức năng quản lý tài khoản
+      const quyenQLTaiKhoan = quyenData.find((q) => q.IdChucNang === QLTaiKhoanId) || {};
+
+      setPermissions({
+        Them: quyenQLTaiKhoan?.Them,
+        Sua: quyenQLTaiKhoan?.Sua,
+        Xoa: quyenQLTaiKhoan?.Xoa,
+        Xem: quyenQLTaiKhoan?.Xem,
+      });
+    };
+
+    loadData();
+  }, []);
+
+  const handleDelete = async (id) => {
+    await deleteUser(id);
+    setUsers((prev) => prev.filter((u) => u.id !== id));
   };
 
   return (
     <AccountUI
       user={user}
       handleLogout={handleLogout}
-      users={users}
-      loaiTKs={loaiTKs}
-      phanQuyen={phanQuyen}
-      onSaveUser={handleCreateOrUpdateUser}
-      onDeleteUser={handleDeleteUser}
-      loading={loading}
+      data={users}
+      loaiTaiKhoans={loaiTaiKhoans}
+      permissions={permissions}
+      onDelete={handleDelete}
+      onSubmitSuccess={async () => {
+        await fetchUsers(setUsers);
+      }}
     />
   );
 }

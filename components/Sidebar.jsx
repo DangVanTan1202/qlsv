@@ -34,8 +34,9 @@ export default function Sidebar({ user }) {
         items.push({ name: "Quản lý tài khoản", icon: <Users />, path: "/admin/accounts" });
         items.push({ name: "Phê duyệt điểm", icon: <BarChart2 />, path: "/admin/duyet" });
         items.push({ name: "Quản lý quyền", icon: <BarChart2 />, path: "/admin/quyen" });
-        items.push({ name: "Quản lý sinh viên", icon: <BarChart2 />, path: "/admin/qlsv" });
+        items.push({ name: "Quản lý sinh viên", icon: <BarChart2 />, path: "/teacher/qlsv" });
         items.push({ name: "Quản lý giảng viên", icon: <BarChart2 />, path: "/admin/qlgv" });
+        items.push({ name: "Quản lý môn học", icon: <BarChart2 />, path: "/admin/mon" });
         break;
       default:
         break;

@@ -4,23 +4,24 @@ import { useState } from "react";
 import { PlusCircle, Trash2, Pencil, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
-import { addUser, updateUser } from "../../service/accountService";
+import { addSinhVien, updateSinhVien } from "../../service/sinhVienService";
 
-export default function AccountUI({
+export default function SinhVienUI({
   user,
   handleLogout,
   data,
-  loaiTaiKhoans,
+  users,
+  lopHocs,
   permissions,
   onDelete,
   onSubmitSuccess,
 }) {
   const [formData, setFormData] = useState({
     id: null,
-    tenTaiKhoan: "",
-    hoTen: "",
-    matKhau: "",
-    LoaiTK_Id: "",
+    maSinhVien: "",
+    ngaySinh: "",
+    user_id: "",
+    idLopHoc: "",
   });
   const [isEdit, setIsEdit] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -28,47 +29,53 @@ export default function AccountUI({
 
   const handleInput = (e) => {
     const { name, value } = e.target;
+    const numericFields = ["user_id", "idLopHoc"];
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: numericFields.includes(name) ? Number(value) : value,
     }));
   };
+  
 
   const handleSubmit = async () => {
     if (isEdit) {
-      await updateUser(formData.id, formData);
+      await updateSinhVien(formData.id, formData);
     } else {
-      await addUser(formData);
+      await addSinhVien(formData);
     }
     setFormData({
       id: null,
-      tenTaiKhoan: "",
-      hoTen: "",
-      matKhau: "",
-      LoaiTK_Id: "",
+      maSinhVien: "",
+      ngaySinh: "",
+      user_id: "",
+      idLopHoc: "",
     });
     setIsEdit(false);
     setShowForm(false);
     onSubmitSuccess();
   };
 
-  const filteredData = data.filter((u) =>
-    u.tenTaiKhoan?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = data.filter((sv) => {
+    const userMatched = users.find((u) => u.id === sv.user_id)?.hoTen?.toLowerCase() || "";
+    return (
+      sv.maSinhVien?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      userMatched.includes(searchTerm.toLowerCase())
+    );
+  });
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-yellow-50 via-pink-100 to-purple-100 text-gray-900 font-sans">
       <Sidebar user={user} />
       <div className="flex-1 px-8 py-6">
         <Header user={user} onLogout={handleLogout} />
-        <h2 className="text-4xl font-bold text-orange-600 mb-8">Quản lý tài khoản</h2>
+        <h2 className="text-4xl font-bold text-orange-600 mb-8">Quản lý sinh viên</h2>
 
         <div className="p-6 space-y-6 bg-white rounded-xl shadow-lg border border-purple-200">
           {/* Tìm kiếm + Thêm */}
           <div className="flex justify-between items-center mb-4">
             <input
               type="text"
-              placeholder="🔍 Tìm kiếm tài khoản..."
+              placeholder="🔍 Tìm kiếm sinh viên..."
               className="input input-bordered w-full max-w-md border-pink-400 focus:ring-2 focus:ring-pink-400"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -81,14 +88,14 @@ export default function AccountUI({
                   setShowForm(true);
                   setFormData({
                     id: null,
-                    tenTaiKhoan: "",
-                    hoTen: "",
-                    matKhau: "",
-                    LoaiTK_Id: "",
+                    maSinhVien: "",
+                    ngaySinh: "",
+                    user_id: "",
+                    idLopHoc: "",
                   });
                 }}
               >
-                <PlusCircle size={18} /> thêm tài khoản
+                <PlusCircle size={18} /> thêm sinh viên
               </button>
             )}
           </div>
@@ -99,22 +106,27 @@ export default function AccountUI({
               <table className="w-full bg-white shadow rounded overflow-hidden">
                 <thead className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white">
                   <tr className="bg-orange-100 text-red-700">
-                    <th className="p-3 text-left">Tên tài khoản</th>
+                    <th className="p-3 text-left">Mã SV</th>
                     <th className="p-3 text-left">Họ tên</th>
-                    <th className="p-3 text-left">Loại tài khoản</th>
+                    <th className="p-3 text-left">Ngày sinh</th>
+                    <th className="p-3 text-left">Lớp</th>
                     {(permissions.Sua || permissions.Xoa) && (
                       <th className="p-3 text-left">Thao tác</th>
                     )}
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.map((u) => {
-                    const loai = loaiTaiKhoans.find((l) => l.id === u.LoaiTK_Id);
+                  {filteredData.map((sv) => {
+                    const u = users.find((u) => u.id === sv.user_id);
+                    const l = lopHocs.find((lh) => lh.id === sv.idLopHoc);
                     return (
-                      <tr key={u.id} className="hover:bg-green-100 transition">
-                        <td className="p-3">{u.tenTaiKhoan}</td>
-                        <td className="p-3">{u.hoTen}</td>
-                        <td className="p-3">{loai?.tenLoai}</td>
+                      <tr key={sv.id} className="hover:bg-green-100 transition">
+                        <td className="p-3">{sv.maSinhVien}</td>
+                        <td className="p-3">{u?.hoTen}</td>
+                        <td className="p-3">
+                          {new Date(sv.ngaySinh).toLocaleDateString()}
+                        </td>
+                        <td className="p-3">{l?.TenLop}</td>
                         {(permissions.Sua || permissions.Xoa) && (
                           <td className="space-x-2">
                             {permissions.Sua && (
@@ -124,11 +136,11 @@ export default function AccountUI({
                                   setIsEdit(true);
                                   setShowForm(true);
                                   setFormData({
-                                    id: u.id,
-                                    tenTaiKhoan: u.tenTaiKhoan,
-                                    hoTen: u.hoTen,
-                                    matKhau: u.matKhau,
-                                    LoaiTK_Id: u.LoaiTK_Id,
+                                    id: sv.id,
+                                    maSinhVien: sv.maSinhVien,
+                                    ngaySinh: sv.ngaySinh,
+                                    user_id: sv.user_id,
+                                    idLopHoc: sv.idLopHoc,
                                   });
                                 }}
                               >
@@ -138,7 +150,7 @@ export default function AccountUI({
                             {permissions.Xoa && (
                               <button
                                 className="p-3 text-red-600"
-                                onClick={() => onDelete(u.id)}
+                                onClick={() => onDelete(sv.id)}
                               >
                                 <Trash2 size={18} /> xóa
                               </button>
@@ -162,44 +174,50 @@ export default function AccountUI({
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
               <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-xl animate-fade-in">
                 <h2 className="text-2xl font-semibold text-center text-orange-600 mb-6">
-                  {isEdit ? "Sửa" : "Thêm"} tài khoản
+                  {isEdit ? "Sửa" : "Thêm"} sinh viên
                 </h2>
 
                 <div className="space-y-4">
                   <input
                     type="text"
-                    name="tenTaiKhoan"
-                    placeholder="Tên tài khoản"
+                    name="maSinhVien"
+                    placeholder="Mã sinh viên"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    value={formData.tenTaiKhoan}
+                    value={formData.maSinhVien}
                     onChange={handleInput}
                   />
                   <input
-                    type="text"
-                    name="hoTen"
-                    placeholder="Họ tên"
+                    type="date"
+                    name="ngaySinh"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    value={formData.hoTen}
-                    onChange={handleInput}
-                  />
-                  <input
-                    type="password"
-                    name="matKhau"
-                    placeholder="Mật khẩu"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    value={formData.matKhau}
+                    value={formData.ngaySinh?.split("T")[0] || ""}
                     onChange={handleInput}
                   />
                   <select
-                    name="LoaiTK_Id"
+                    name="user_id"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    value={formData.LoaiTK_Id}
+                    value={formData.user_id}
                     onChange={handleInput}
                   >
-                    <option value="">-- Chọn loại tài khoản --</option>
-                    {loaiTaiKhoans.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.tenLoai}
+                    <option value="">-- Chọn tài khoản sinh viên --</option>
+                    {users
+                      .filter((u) => u.LoaiTK_Id === 2) // 👈 Giả định loại sinh viên là 2
+                      .map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.hoTen}
+                        </option>
+                      ))}
+                  </select>
+                  <select
+                    name="idLopHoc"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    value={formData.idLopHoc}
+                    onChange={handleInput}
+                  >
+                    <option value="">-- Chọn lớp học --</option>
+                    {lopHocs.map((lh) => (
+                      <option key={lh.id} value={lh.id}>
+                        {lh.TenLop}
                       </option>
                     ))}
                   </select>

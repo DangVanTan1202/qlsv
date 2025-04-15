@@ -4,14 +4,11 @@ import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { useState } from "react";
 import { addGiangVien, updateGiangVien } from "../../service/giangVienService";
-
 export default function GiangVienUI({
   data,
   user,
   handleLogout,
   users,
-  lopHocs,
-  monHocs,
   permissions,
   onDelete,
   onSubmitSuccess,
@@ -21,8 +18,6 @@ export default function GiangVienUI({
     maGiangVien: "",
     ngaySinh: "",
     user_id: "",
-    lopHoc_id: "",
-    monHoc_id: "",
   });
   const [isEdit, setIsEdit] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -43,8 +38,6 @@ export default function GiangVienUI({
       maGiangVien: "",
       ngaySinh: "",
       user_id: "",
-      lopHoc_id: "",
-      monHoc_id: "",
     });
     setIsEdit(false);
     setShowForm(false);
@@ -90,13 +83,11 @@ export default function GiangVienUI({
                     maGiangVien: "",
                     ngaySinh: "",
                     user_id: "",
-                    lopHoc_id: "",
-                    monHoc_id: "",
                   });
                 }}
               >
                 <PlusCircle className="mr-2" size={18} />
-                Thêm giảng viên
+                cập nhật thông tin giảng viên
               </button>
             )}
           </div>
@@ -110,8 +101,6 @@ export default function GiangVienUI({
                     <th className="p-3 text-left"> Mã GV</th>
                     <th className="p-3 text-left">Họ tên</th>
                     <th className="p-3 text-left">Ngày sinh</th>
-                    <th className="p-3 text-left">Lớp</th>
-                    <th className="p-3 text-left">Môn</th>
                     {(permissions.Sua || permissions.Xoa) && (
                       <th className="p-3 text-left">Thao tác</th>
                     )}
@@ -120,8 +109,6 @@ export default function GiangVienUI({
                 <tbody>
                   {filteredData.map((gv) => {
                     const user = users.find((u) => u.id === gv.user_id);
-                    const lopHoc = lopHocs.find((lh) => lh.id === gv.lopHoc_id);
-                    const monHoc = monHocs.find((mh) => mh.id === gv.monHoc_id);
                     return (
                       <tr key={gv.id} className="hover:bg-green-100 transition">
                         <td className="p-3">{gv.maGiangVien}</td>
@@ -129,8 +116,6 @@ export default function GiangVienUI({
                         <td className="p-3">
                           {new Date(gv.ngaySinh).toLocaleDateString()}
                         </td>
-                        <td className="p-3">{lopHoc?.TenLop}</td>
-                        <td className="p-3">{monHoc?.tenMonHoc}</td>
                         {(permissions.Sua || permissions.Xoa) && (
                           <td className="space-x-2">
                             {permissions.Sua && (
@@ -144,8 +129,6 @@ export default function GiangVienUI({
                                     maGiangVien: gv.maGiangVien,
                                     ngaySinh: gv.ngaySinh,
                                     user_id: gv.user_id,
-                                    lopHoc_id: gv.lopHoc_id,
-                                    monHoc_id: gv.monHoc_id,
                                   });
                                 }}
                               >
@@ -213,32 +196,8 @@ export default function GiangVienUI({
                         </option>
                       ))}
                   </select>
-                  <select
-                    name="lopHoc_id"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    value={formData.lopHoc_id}
-                    onChange={handleInput}
-                  >
-                    <option value="">-- Chọn lớp học --</option>
-                    {lopHocs.map((lh) => (
-                      <option key={lh.id} value={lh.id}>
-                        {lh.TenLop}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    name="monHoc_id"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    value={formData.monHoc_id}
-                    onChange={handleInput}
-                  >
-                    <option value="">-- Chọn môn học --</option>
-                    {monHocs.map((mh) => (
-                      <option key={mh.id} value={mh.id}>
-                        {mh.tenMonHoc}
-                      </option>
-                    ))}
-                  </select>
+                  
+                
                 </div>
 
                 {/* Các nút hành động */}

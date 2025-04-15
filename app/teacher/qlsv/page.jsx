@@ -1,25 +1,31 @@
 "use client";
-import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
-import GiangVienUI from "./UI";
+import { useRouter } from "next/navigation";
+import SinhVienUI from "./ui"; // 👈 Sửa tên UI component tương ứng
 import {
-  fetchGiangViensClient,
+  fetchSinhViensClient,
   fetchUsers,
+  fetchLopHocs,
   fetchPhanQuyenByLoaiTK,
   fetchChucNangs,
-  deleteGiangVien,
-} from "../../service/giangVienService";
+  deleteSinhVien,
+} from "../../service/sinhVienService"; // 👈 Đường dẫn đến sinhVienService
+
 export default function Page() {
   const [user, setUser] = useState(null);
-  const [giangViens, setGiangViens] = useState([]);
+  const [sinhViens, setSinhViens] = useState([]);
   const [users, setUsers] = useState([]);
-  const router = useRouter();
+  const [lopHocs, setLopHocs] = useState([]);
   const [permissions, setPermissions] = useState({
     Them: false,
     Sua: false,
     Xoa: false,
     Xem: false,
   });
+
+  const router = useRouter();
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -42,24 +48,26 @@ export default function Page() {
 
   useEffect(() => {
     const loadData = async () => {
-      await fetchGiangViensClient(setGiangViens);
+      await fetchSinhViensClient(setSinhViens);
       await fetchUsers(setUsers);
+      await fetchLopHocs(setLopHocs);
+
       const quyenData = await new Promise((resolve) => {
-        fetchPhanQuyenByLoaiTK(0, resolve); // 1 là loại tài khoản giảng viên
+        fetchPhanQuyenByLoaiTK(0, resolve); // 👈 ID loại tài khoản Admin
       });
 
       const chucNangsData = await new Promise((resolve) => {
         fetchChucNangs(resolve);
       });
 
-      const QLGVId = chucNangsData.find((c) => c.code === "QLGV")?.id;
-      const quyenQLGV = quyenData.find((q) => q.IdChucNang === QLGVId) || {};
+      const QLSVId = chucNangsData.find((c) => c.code === "QLSV")?.id; // 👈 code của chức năng quản lý sinh viên
+      const quyenQLSV = quyenData.find((q) => q.IdChucNang === QLSVId) || {};
 
       setPermissions({
-        Them: quyenQLGV?.Them,
-        Sua: quyenQLGV?.Sua,
-        Xoa: quyenQLGV?.Xoa,
-        Xem: quyenQLGV?.Xem,
+        Them: quyenQLSV?.Them,
+        Sua: quyenQLSV?.Sua,
+        Xoa: quyenQLSV?.Xoa,
+        Xem: quyenQLSV?.Xem,
       });
     };
 
@@ -67,20 +75,21 @@ export default function Page() {
   }, []);
 
   const handleDelete = async (id) => {
-    await deleteGiangVien(id);
-    setGiangViens((prev) => prev.filter((gv) => gv.id !== id));
+    await deleteSinhVien(id);
+    setSinhViens((prev) => prev.filter((sv) => sv.id !== id));
   };
 
   return (
-    <GiangVienUI
+    <SinhVienUI
       user={user}
       handleLogout={handleLogout}
-      data={giangViens}
+      data={sinhViens}
       users={users}
+      lopHocs={lopHocs}
       permissions={permissions}
       onDelete={handleDelete}
       onSubmitSuccess={async () => {
-        await fetchGiangViensClient(setGiangViens);
+        await fetchSinhViensClient(setSinhViens);
       }}
     />
   );

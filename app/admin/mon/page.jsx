@@ -1,25 +1,31 @@
 "use client";
-import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
-import GiangVienUI from "./UI";
+import { useRouter } from "next/navigation";
+import MonHocUI from "./ui"; // Sửa tên UI component tương ứng
 import {
-  fetchGiangViensClient,
-  fetchUsers,
+  fetchMonHocsClient,
+  fetchGiangViens,
+  fetchLopHocs,
   fetchPhanQuyenByLoaiTK,
   fetchChucNangs,
-  deleteGiangVien,
-} from "../../service/giangVienService";
+  deleteMonHoc,
+} from "../../service/monHocService"; //  Đường dẫn đến monHocService
+
 export default function Page() {
   const [user, setUser] = useState(null);
+  const [monHocs, setMonHocs] = useState([]);
   const [giangViens, setGiangViens] = useState([]);
-  const [users, setUsers] = useState([]);
-  const router = useRouter();
+  const [lopHocs, setLopHocs] = useState([]);
   const [permissions, setPermissions] = useState({
     Them: false,
     Sua: false,
     Xoa: false,
     Xem: false,
   });
+
+  const router = useRouter();
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -42,24 +48,26 @@ export default function Page() {
 
   useEffect(() => {
     const loadData = async () => {
-      await fetchGiangViensClient(setGiangViens);
-      await fetchUsers(setUsers);
+      await fetchMonHocsClient(setMonHocs);
+      await fetchGiangViens(setGiangViens);
+      await fetchLopHocs(setLopHocs);
+
       const quyenData = await new Promise((resolve) => {
-        fetchPhanQuyenByLoaiTK(0, resolve); // 1 là loại tài khoản giảng viên
+        fetchPhanQuyenByLoaiTK(0, resolve); // 👈 ID loại tài khoản Admin
       });
 
       const chucNangsData = await new Promise((resolve) => {
         fetchChucNangs(resolve);
       });
 
-      const QLGVId = chucNangsData.find((c) => c.code === "QLGV")?.id;
-      const quyenQLGV = quyenData.find((q) => q.IdChucNang === QLGVId) || {};
+      const QLMonHocId = chucNangsData.find((c) => c.code === "QLMH")?.id; // 👈 code của chức năng quản lý môn học
+      const quyenQLMonHoc = quyenData.find((q) => q.IdChucNang === QLMonHocId) || {};
 
       setPermissions({
-        Them: quyenQLGV?.Them,
-        Sua: quyenQLGV?.Sua,
-        Xoa: quyenQLGV?.Xoa,
-        Xem: quyenQLGV?.Xem,
+        Them: quyenQLMonHoc?.Them,
+        Sua: quyenQLMonHoc?.Sua,
+        Xoa: quyenQLMonHoc?.Xoa,
+        Xem: quyenQLMonHoc?.Xem,
       });
     };
 
@@ -67,20 +75,21 @@ export default function Page() {
   }, []);
 
   const handleDelete = async (id) => {
-    await deleteGiangVien(id);
-    setGiangViens((prev) => prev.filter((gv) => gv.id !== id));
+    await deleteMonHoc(id);
+    setMonHocs((prev) => prev.filter((mh) => mh.id !== id));
   };
 
   return (
-    <GiangVienUI
+    <MonHocUI
       user={user}
       handleLogout={handleLogout}
-      data={giangViens}
-      users={users}
+      data={monHocs}
+      giangViens={giangViens}
+      lopHocs={lopHocs}
       permissions={permissions}
       onDelete={handleDelete}
       onSubmitSuccess={async () => {
-        await fetchGiangViensClient(setGiangViens);
+        await fetchMonHocsClient(setMonHocs);
       }}
     />
   );
