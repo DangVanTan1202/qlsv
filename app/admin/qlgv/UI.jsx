@@ -1,66 +1,236 @@
 "use client";
 import { useState } from "react";
-import { Pencil, Trash2, PlusCircle } from "lucide-react";
+import {
+  addGiangVien,
+  updateGiangVien,
+} from "../../service/giangVienService";
 
-export default function GiangVienUI({ giangViens, users, lopHocs, monHocs, fetchData, loading }) {
+export default function GiangVienUI({
+  data,
+  users,
+  lopHocs,
+  monHocs,
+  permissions,
+  onDelete,
+  onSubmitSuccess,
+}) {
+  const [formData, setFormData] = useState({
+    id: null,
+    maGiangVien: "",
+    ngaySinh: "",
+    user_id: "",
+    lopHoc_id: "",
+    monHoc_id: "",
+  });
+  const [isEdit, setIsEdit] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredGiangVien = (giangViens || []).filter(gv => {
-    const user = users?.find(u => u.id === gv.user_id);
-    return user?.hoTen?.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-  
-  return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold text-orange-600 mb-4">Quản lý giảng viên</h2>
+  const handleInput = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
-      <div className="mb-4 flex items-center justify-between">
+  const handleSubmit = async () => {
+    if (isEdit) {
+      await updateGiangVien(formData.id, formData);
+    } else {
+      await addGiangVien(formData);
+    }
+    setFormData({
+      id: null,
+      maGiangVien: "",
+      ngaySinh: "",
+      user_id: "",
+      lopHoc_id: "",
+      monHoc_id: "",
+    });
+    setIsEdit(false);
+    setShowForm(false);
+    onSubmitSuccess();
+  };
+
+  const filteredData = data.filter(
+    (gv) =>
+      gv.maGiangVien?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      users
+        .find((u) => u.id === gv.user_id)
+        ?.hoTen?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="p-4 space-y-4">
+      {/* Tìm kiếm + Thêm */}
+      <div className="flex gap-2 items-center">
+        {permissions.Them && (
+          <button
+            className="btn btn-success"
+            onClick={() => {
+              setIsEdit(false);
+              setShowForm(true);
+              setFormData({
+                id: null,
+                maGiangVien: "",
+                ngaySinh: "",
+                user_id: "",
+                lopHoc_id: "",
+                monHoc_id: "",
+              });
+            }}
+          >
+            + Thêm giảng viên
+          </button>
+        )}
         <input
           type="text"
-          placeholder="🔍 Tìm theo tên giảng viên..."
-          className="border px-4 py-2 rounded-md w-full max-w-md focus:ring-2 focus:ring-orange-400"
+          placeholder="Tìm kiếm..."
+          className="input input-bordered w-full"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button className="ml-4 px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 flex items-center gap-2">
-          <PlusCircle size={20} /> Thêm giảng viên
-        </button>
       </div>
 
-      <table className="w-full bg-white rounded shadow text-left">
-        <thead>
-          <tr className="bg-orange-100 text-orange-700">
-            <th className="p-3">Mã GV</th>
-            <th className="p-3">Họ tên</th>
-            <th className="p-3">Ngày sinh</th>
-            <th className="p-3">Tài khoản</th>
-            <th className="p-3">Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredGiangVien.map(gv => {
-            const user = users.find(u => u.id === gv.user_id);
-            return (
-              <tr key={gv.id} className="hover:bg-gray-50">
-                <td className="p-3">{gv.maGiangVien}</td>
-                <td className="p-3">{user?.hoTen}</td>
-                <td className="p-3">{new Date(gv.ngaySinh).toLocaleDateString()}</td>
-                <td className="p-3">{user?.tenTaiKhoan}</td>
-                <td className="p-3 flex gap-2">
-                  <button className="text-blue-600 hover:text-blue-800">
-                    <Pencil size={18} />
-                  </button>
-                  <button className="text-red-600 hover:text-red-800">
-                    <Trash2 size={18} />
-                  </button>
-                </td>
+      {/* Bảng dữ liệu */}
+      {permissions.Xem ? (
+        <div className="overflow-x-auto">
+          <table className="table table-zebra">
+            <thead>
+              <tr>
+                <th>Mã GV</th>
+                <th>Họ tên</th>
+                <th>Ngày sinh</th>
+                <th>Lớp</th>
+                <th>Môn</th>
+                {(permissions.Sua || permissions.Xoa) && <th>Thao tác</th>}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {filteredData.map((gv) => {
+                const user = users.find((u) => u.id === gv.user_id);
+                const lopHoc = lopHocs.find((lh) => lh.id === gv.lopHoc_id);
+                const monHoc = monHocs.find((mh) => mh.id === gv.monHoc_id);
+                return (
+                  <tr key={gv.id}>
+                    <td>{gv.maGiangVien}</td>
+                    <td>{user?.hoTen}</td>
+                    <td>{new Date(gv.ngaySinh).toLocaleDateString()}</td>
+                    <td>{lopHoc?.TenLop}</td>
+                    <td>{monHoc?.tenMonHoc}</td>
+                    {(permissions.Sua || permissions.Xoa) && (
+                      <td className="space-x-2">
+                        {permissions.Sua && (
+                          <button
+                            className="btn btn-sm btn-warning"
+                            onClick={() => {
+                              setIsEdit(true);
+                              setShowForm(true);
+                              setFormData({
+                                id: gv.id,
+                                maGiangVien: gv.maGiangVien,
+                                ngaySinh: gv.ngaySinh,
+                                user_id: gv.user_id,
+                                lopHoc_id: gv.lopHoc_id,
+                                monHoc_id: gv.monHoc_id,
+                              });
+                            }}
+                          >
+                            Sửa
+                          </button>
+                        )}
+                        {permissions.Xoa && (
+                          <button
+                            className="btn btn-sm btn-error"
+                            onClick={() => onDelete(gv.id)}
+                          >
+                            Xóa
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="text-center text-red-500 font-bold">
+          Bạn không có quyền xem dữ liệu!
+        </div>
+      )}
 
-      {loading && <p className="mt-4 text-orange-600">Đang tải dữ liệu...</p>}
+      {/* Form thêm/sửa */}
+      {(permissions.Them || permissions.Sua) && showForm && (
+        <div className="space-y-2 border p-4 rounded-md bg-base-100 shadow">
+          <h2 className="text-lg font-semibold">
+            {isEdit ? "Sửa" : "Thêm"} giảng viên
+          </h2>
+          <input
+            type="text"
+            name="maGiangVien"
+            placeholder="Mã giảng viên"
+            className="input input-bordered w-full"
+            value={formData.maGiangVien}
+            onChange={handleInput}
+          />
+          <input
+            type="date"
+            name="ngaySinh"
+            className="input input-bordered w-full"
+            value={formData.ngaySinh?.split("T")[0] || ""}
+            onChange={handleInput}
+          />
+          <select
+            name="user_id"
+            className="select select-bordered w-full"
+            value={formData.user_id}
+            onChange={handleInput}
+          >
+            <option value="">-- Chọn tài khoản giảng viên --</option>
+            {users
+              .filter((u) => u.LoaiTK_Id === 1)
+              .map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.hoTen}
+                </option>
+              ))}
+          </select>
+          <select
+            name="lopHoc_id"
+            className="select select-bordered w-full"
+            value={formData.lopHoc_id}
+            onChange={handleInput}
+          >
+            <option value="">-- Chọn lớp học --</option>
+            {lopHocs.map((lh) => (
+              <option key={lh.id} value={lh.id}>
+                {lh.TenLop}
+              </option>
+            ))}
+          </select>
+          <select
+            name="monHoc_id"
+            className="select select-bordered w-full"
+            value={formData.monHoc_id}
+            onChange={handleInput}
+          >
+            <option value="">-- Chọn môn học --</option>
+            {monHocs.map((mh) => (
+              <option key={mh.id} value={mh.id}>
+                {mh.tenMonHoc}
+              </option>
+            ))}
+          </select>
+          <div className="flex gap-2">
+            <button className="btn btn-primary" onClick={handleSubmit}>
+              {isEdit ? "Cập nhật" : "Thêm"}
+            </button>
+            <button className="btn" onClick={() => setShowForm(false)}>
+              Hủy
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

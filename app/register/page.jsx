@@ -37,7 +37,6 @@ export default function Register() {
       HoTen: form.HoTen,
       LoaiTK_Id: Number(form.LoaiTK_Id)
     });
-  
     try {
       const res = await fetch("http://qltruonghoc.ddns.net/Login/Register", {
         method: "POST",

@@ -10,7 +10,6 @@ import {
   deleteUser,
   createUser,
 } from "../../service/accountService";
-
 export default function AccountPage() {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);

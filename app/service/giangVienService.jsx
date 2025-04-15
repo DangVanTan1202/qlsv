@@ -1,101 +1,54 @@
-"use client";
+const API_BASE = 'http://qltruonghoc.ddns.net/odata';
 
-const API_BASE = "http://qltruonghoc.ddns.net/odata";
-
+// Lấy token từ localStorage
 export const getToken = () => {
   return localStorage.getItem("token") || "";
 };
 
-// ======================== USERS ==========================
+// 👉 Dùng trong Server Component
+export const fetchGiangViens = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/GiangViens?$expand=User`);
+    const data = await res.json();
+    return data.value || [];
+  } catch (error) {
+    console.error("Lỗi fetch giảng viên:", error);
+    return [];
+  }
+};
 
-export async function fetchUsers() {
+// 👉 Dùng trong Client Component
+export const fetchGiangViensClient = async (setGiangViens) => {
+  try {
+    const res = await fetch(`${API_BASE}/GiangViens?$expand=User`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await res.json();
+    setGiangViens(data.value || []);
+  } catch (error) {
+    console.error("Lỗi fetch giảng viên:", error);
+  }
+};
+// Lấy danh sách user
+export const fetchUsers = async (setUsers) => {
   try {
     const res = await fetch(`${API_BASE}/Users`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
       },
     });
     const data = await res.json();
-    return data.value || [];
+    setUsers(data.value || []);
   } catch (error) {
-    console.error("Lỗi fetch Users:", error);
-    return [];
+    console.error("Lỗi fetch users:", error);
   }
-}
+};
 
-// ======================== GIẢNG VIÊN ==========================
-
-export async function fetchGiangViens() {
-  try {
-    const res = await fetch(`${API_BASE}/GiangViens`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const data = await res.json();
-    return data.value || [];
-  } catch (error) {
-    console.error("Lỗi fetch GiangViens:", error);
-    return [];
-  }
-}
-
-export async function createGiangVien(newGV) {
-  try {
-    const res = await fetch(`${API_BASE}/GiangViens`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newGV),
-    });
-    if (!res.ok) throw new Error("Lỗi tạo giảng viên");
-    return await res.json();
-  } catch (error) {
-    console.error("Lỗi createGiangVien:", error);
-    throw error;
-  }
-}
-
-export async function updateGiangVien(id, updatedGV) {
-  try {
-    const res = await fetch(`${API_BASE}/GiangViens(${id})`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedGV),
-    });
-    if (!res.ok) throw new Error("Lỗi cập nhật giảng viên");
-    return true;
-  } catch (error) {
-    console.error("Lỗi updateGiangVien:", error);
-    throw error;
-  }
-}
-
-export async function deleteGiangVien(id) {
-  try {
-    const res = await fetch(`${API_BASE}/GiangViens(${id})`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    if (!res.ok) throw new Error("Lỗi xoá giảng viên");
-    return true;
-  } catch (error) {
-    console.error("Lỗi deleteGiangVien:", error);
-    throw error;
-  }
-}
-
-// ======================== LỚP HỌC ==========================
-
-export async function fetchLopHocs() {
+// Lấy danh sách lớp học
+export const fetchLopHocs = async (setLopHocs) => {
   try {
     const res = await fetch(`${API_BASE}/LopHocs`, {
       headers: {
@@ -103,16 +56,14 @@ export async function fetchLopHocs() {
       },
     });
     const data = await res.json();
-    return data.value || [];
+    setLopHocs(data.value || []);
   } catch (error) {
-    console.error("Lỗi fetch LopHocs:", error);
-    return [];
+    console.error("Lỗi fetch lớp học:", error);
   }
-}
+};
 
-// ======================== MÔN HỌC ==========================
-
-export async function fetchMonHocs() {
+// Lấy danh sách môn học
+export const fetchMonHocs = async (setMonHocs) => {
   try {
     const res = await fetch(`${API_BASE}/MonHocs`, {
       headers: {
@@ -120,27 +71,102 @@ export async function fetchMonHocs() {
       },
     });
     const data = await res.json();
-    return data.value || [];
+    setMonHocs(data.value || []);
   } catch (error) {
-    console.error("Lỗi fetch MonHocs:", error);
-    return [];
+    console.error("Lỗi fetch môn học:", error);
   }
-}
+};
 
-export async function ganMonHocLopHoc(monHocData) {
+// Thêm giảng viên
+export const addGiangVien = async (data) => {
   try {
-    const res = await fetch(`${API_BASE}/MonHocs`, {
+    const res = await fetch(`${API_BASE}/GiangViens`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
       },
-      body: JSON.stringify(monHocData),
+      body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Lỗi gán môn học và lớp học");
-    return await res.json();
+
+    if (!res.ok) {
+      const error = await res.text();
+      throw new Error(`Lỗi thêm: ${error}`);
+    }
+
+    console.log("Thêm giảng viên thành công");
   } catch (error) {
-    console.error("Lỗi ganMonHocLopHoc:", error);
-    throw error;
+    console.error("Lỗi thêm giảng viên:", error);
   }
-}
+};
+// Cập nhật giảng viên
+export const updateGiangVien = async (id, data) => {
+  try {
+    const res = await fetch(`${API_BASE}/GiangViens(${id})`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const error = await res.text();
+      throw new Error(`Lỗi cập nhật: ${error}`);
+    }
+
+    console.log("Cập nhật giảng viên thành công");
+  } catch (error) {
+    console.error("Lỗi cập nhật giảng viên:", error);
+  }
+};
+
+// Xoá giảng viên
+export const deleteGiangVien = async (id) => {
+  try {
+    const res = await fetch(`${API_BASE}/GiangViens(${id})`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!res.ok) {
+      const error = await res.text();
+      throw new Error(`Lỗi xoá: ${error}`);
+    }
+
+    console.log("Xoá giảng viên thành công");
+  } catch (error) {
+    console.error("Lỗi xoá giảng viên:", error);
+  }
+};
+// Lấy danh sách chức năng
+export const fetchChucNangs = async (setChucNangs) => {
+  try {
+    const res = await fetch("http://qltruonghoc.ddns.net/odata/ChucNangs", {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    setChucNangs(data.value || []);
+  } catch (error) {
+    console.error("Lỗi fetch chức năng:", error);
+  }
+};
+// Lấy danh sách phân quyền theo loại tài khoản
+export const fetchPhanQuyenByLoaiTK = async (idLoaiTK, setPhanQuyenList) => {
+  try {
+    const res = await fetch(`http://qltruonghoc.ddns.net/odata/PhanQuyen_LoaiTK?$filter=IdLoaiTK eq ${idLoaiTK}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+    const data = await res.json();
+    setPhanQuyenList(data.value || []);
+  } catch (error) {
+    console.error("Lỗi fetch phân quyền:", error);
+  }
+};
