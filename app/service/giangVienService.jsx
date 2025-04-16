@@ -5,7 +5,7 @@ export const getToken = () => {
   return localStorage.getItem("token") || "";
 };
 
-// 👉 Dùng trong Server Component
+// Dùng trong Server Component
 export const fetchGiangViens = async () => {
   try {
     const res = await fetch(`${API_BASE}/GiangViens?$expand=User`);
@@ -16,8 +16,7 @@ export const fetchGiangViens = async () => {
     return [];
   }
 };
-
-// 👉 Dùng trong Client Component
+//  Dùng trong Client Component
 export const fetchGiangViensClient = async (setGiangViens) => {
   try {
     const res = await fetch(`${API_BASE}/GiangViens?$expand=User`, {

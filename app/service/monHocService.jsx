@@ -100,13 +100,11 @@ export const addMonHoc = async (data) => {
       },
       body: JSON.stringify(payload),
     });
-
     if (!res.ok) {
       const error = await res.json();
       console.error("Lỗi chi tiết từ API:", error);
       throw new Error(`Lỗi thêm: ${error?.["odata.error"]?.message?.value || "Không rõ lỗi"}`);
     }
-
     const result = await res.json();
     console.log("Thêm môn học thành công:", result);
     return result;

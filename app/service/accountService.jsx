@@ -5,7 +5,7 @@ export const getToken = () => {
 };
 
 // 👉 Lấy danh sách tài khoản
-export const fetchUsers = async (setUsers) => {
+export const fetchUsersClient = async (setUsers) => {
   try {
     const res = await fetch(`${API_BASE}/Users`, {
       headers: {

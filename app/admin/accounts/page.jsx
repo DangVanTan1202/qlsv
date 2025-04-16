@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AccountUI from "./UI";
 import {
-  fetchUsers,
+  fetchUsersClient,
   fetchLoaiTaiKhoans,
   fetchPhanQuyenByLoaiTK,
   fetchChucNangs,
@@ -36,23 +36,21 @@ export default function Page() {
       router.push("/login");
       return;
     }
-
     const parsedUser = JSON.parse(storedUser);
     if (parsedUser.LoaiTK_Name !== "Admin") {
       router.push("/login");
       return;
     }
-
     setUser(parsedUser);
   }, []);
 
   useEffect(() => {
     const loadData = async () => {
-      await fetchUsers(setUsers);
+      await fetchUsersClient(setUsers);
       await fetchLoaiTaiKhoans(setLoaiTaiKhoans);
 
       const quyenData = await new Promise((resolve) => {
-        fetchPhanQuyenByLoaiTK(0, resolve); // Admin
+        fetchPhanQuyenByLoaiTK(0, resolve); // 👈 Admin có IdLoaiTK = 0
       });
 
       const chucNangsData = await new Promise((resolve) => {
@@ -75,7 +73,7 @@ export default function Page() {
 
   const handleDelete = async (id) => {
     await deleteUser(id);
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+    setUsers((prev) => prev.filter((user) => user.id !== id));
   };
 
   return (
@@ -87,7 +85,7 @@ export default function Page() {
       permissions={permissions}
       onDelete={handleDelete}
       onSubmitSuccess={async () => {
-        await fetchUsers(setUsers);
+        await fetchUsersClient(setUsers);
       }}
     />
   );

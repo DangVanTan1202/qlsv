@@ -1,0 +1,132 @@
+
+const API_BASE = "http://qltruonghoc.ddns.net/odata";
+
+const getToken = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token");
+  }
+  return null;
+};
+// Lấy danh sách môn học theo giảng viên hiện tại
+export const fetchMonHocsByGiangVien = async (idGiangVien) => {
+    try {
+      const res = await fetch(`${API_BASE}/MonHocs?$expand=GiangVien,LopHoc`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+      const data = await res.json();
+      console.log("Danh sách môn học trả về:", data.value);
+      console.log("Lọc theo giảng viên ID:", idGiangVien);
+      return (data.value || []).filter(mon => mon.GiangVien && String(mon.GiangVien.id) === String(idGiangVien));
+
+      
+    } catch (error) {
+      console.error("Lỗi fetch MonHocs:", error);
+      return [];
+    }
+  };
+// Lấy danh sách sinh viên theo lớp học
+export const fetchSinhViensByLop = async (idLopHoc) => {
+    try {
+      // Fetch sinh viên theo lớp
+      const res = await fetch(`${API_BASE}/SinhViens?$filter=idLopHoc eq ${idLopHoc}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+      const sinhViensData = await res.json();
+      const sinhViens = sinhViensData.value || [];
+      
+      // Lấy thông tin họ tên từ bảng User cho từng sinh viên
+      const sinhViensWithNames = await Promise.all(
+        sinhViens.map(async (sv) => {
+          const userRes = await fetch(`${API_BASE}/Users?$filter=id eq ${sv.user_id}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
+          const userData = await userRes.json();
+          const user = userData.value[0] || {};
+          return {
+            ...sv,
+            hoTen: user.hoTen || "Chưa có họ tên", // Lấy họ tên hoặc để mặc định nếu không có
+          };
+        })
+      );
+  
+      console.log("🎓 Sinh viên với họ tên:", sinhViensWithNames);
+      return sinhViensWithNames; // Trả về sinh viên với thông tin họ tên
+    } catch (error) {
+      console.error("Lỗi fetch SinhViens:", error);
+      return []; // Nếu có lỗi, trả về mảng rỗng
+    }
+  };
+  
+// Gửi điểm cho sinh viên
+export const submitDiem = async ({ idSinhVien, idMonHoc, diem, idGiangVien }) => {
+  try {
+    const res = await fetch(`${API_BASE}/DiemSoes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({
+        idSinhVien,
+        idMonHoc,
+        diem,
+        idGiangVien,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Không thể gửi điểm");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Lỗi gửi điểm:", error);
+    throw error;
+  }
+};
+
+// Lấy danh sách chức năng
+export const fetchChucNangs = async (setChucNangs) => {
+  try {
+    const res = await fetch(`${API_BASE}/ChucNangs`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    setChucNangs(data.value || []);
+  } catch (error) {
+    console.error("Lỗi fetch chức năng:", error);
+  }
+};
+
+// Lấy danh sách phân quyền theo loại tài khoản
+export const fetchPhanQuyenByLoaiTK = async (idLoaiTK, setPhanQuyenList) => {
+    if (!idLoaiTK) {
+      console.warn("ID loại tài khoản không hợp lệ:", idLoaiTK);
+      setPhanQuyenList([]); // reset nếu cần
+      return;
+    }
+  
+    try {
+      const res = await fetch(
+        `http://qltruonghoc.ddns.net/odata/PhanQuyen_LoaiTK?$filter=IdLoaiTK eq ${idLoaiTK}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+      const data = await res.json();
+      setPhanQuyenList(data.value || []);
+    } catch (error) {
+      console.error("Lỗi fetch phân quyền:", error);
+    }
+  };
+  

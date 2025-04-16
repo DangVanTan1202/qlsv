@@ -31,7 +31,6 @@ export default function Page() {
     localStorage.removeItem("user");
     router.push("/login");
   };
-
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -39,13 +38,12 @@ export default function Page() {
       return;
     }
     const parsedUser = JSON.parse(storedUser);
-    if (parsedUser.LoaiTK_Name !== "Admin") {
+    if (!["Giảng Viên", "Admin"].includes(parsedUser.LoaiTK_Name)) {
       router.push("/login");
       return;
     }
     setUser(parsedUser);
   }, []);
-
   useEffect(() => {
     const loadData = async () => {
       await fetchSinhViensClient(setSinhViens);
@@ -53,7 +51,7 @@ export default function Page() {
       await fetchLopHocs(setLopHocs);
 
       const quyenData = await new Promise((resolve) => {
-        fetchPhanQuyenByLoaiTK(0, resolve); // 👈 ID loại tài khoản Admin
+        fetchPhanQuyenByLoaiTK(1, resolve); // 👈 ID loại tài khoản Admin
       });
 
       const chucNangsData = await new Promise((resolve) => {

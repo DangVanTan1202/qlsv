@@ -28,9 +28,10 @@ export default function AccountUI({
 
   const handleInput = (e) => {
     const { name, value } = e.target;
+    const numericFields = ["LoaiTK_Id"];
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: numericFields.includes(name) ? Number(value) : value,
     }));
   };
 
@@ -52,8 +53,8 @@ export default function AccountUI({
     onSubmitSuccess();
   };
 
-  const filteredData = data.filter((u) =>
-    u.tenTaiKhoan?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = (data || []).filter((tk) =>
+    (tk?.tenTaiKhoan || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -99,7 +100,7 @@ export default function AccountUI({
               <table className="w-full bg-white shadow rounded overflow-hidden">
                 <thead className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white">
                   <tr className="bg-orange-100 text-red-700">
-                    <th className="p-3 text-left">Tên tài khoản</th>
+                    <th className="p-3 text-left">Tên đăng nhập</th>
                     <th className="p-3 text-left">Họ tên</th>
                     <th className="p-3 text-left">Loại tài khoản</th>
                     {(permissions.Sua || permissions.Xoa) && (
@@ -108,13 +109,15 @@ export default function AccountUI({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.map((u) => {
-                    const loai = loaiTaiKhoans.find((l) => l.id === u.LoaiTK_Id);
+                  {filteredData.map((tk) => {
+                      const loaiTK = loaiTaiKhoans.find((l) => Number(l.id) === Number(tk.LoaiTK_Id));
                     return (
-                      <tr key={u.id} className="hover:bg-green-100 transition">
-                        <td className="p-3">{u.tenTaiKhoan}</td>
-                        <td className="p-3">{u.hoTen}</td>
-                        <td className="p-3">{loai?.tenLoai}</td>
+                      <tr key={tk.id} className="hover:bg-green-100 transition">
+                        <td className="p-3">{tk.tenTaiKhoan}</td>
+                        <td className="p-3">{tk.hoTen}</td>
+                        <td className="p-3">
+                          {loaiTK?.TenLoaiTK || "không tìm thấy"}
+                        </td>
                         {(permissions.Sua || permissions.Xoa) && (
                           <td className="space-x-2">
                             {permissions.Sua && (
@@ -124,11 +127,11 @@ export default function AccountUI({
                                   setIsEdit(true);
                                   setShowForm(true);
                                   setFormData({
-                                    id: u.id,
-                                    tenTaiKhoan: u.tenTaiKhoan,
-                                    hoTen: u.hoTen,
-                                    matKhau: u.matKhau,
-                                    LoaiTK_Id: u.LoaiTK_Id,
+                                    id: tk.id,
+                                    tenTaiKhoan: tk.tenTaiKhoan,
+                                    hoTen: tk.hoTen,
+                                    matKhau: tk.matKhau,
+                                    LoaiTK_Id: tk.LoaiTK_Id,
                                   });
                                 }}
                               >
@@ -138,7 +141,7 @@ export default function AccountUI({
                             {permissions.Xoa && (
                               <button
                                 className="p-3 text-red-600"
-                                onClick={() => onDelete(u.id)}
+                                onClick={() => onDelete(tk.id)}
                               >
                                 <Trash2 size={18} /> xóa
                               </button>
@@ -168,15 +171,15 @@ export default function AccountUI({
                 <div className="space-y-4">
                   <input
                     type="text"
-                    name="tenTaiKhoan"
-                    placeholder="Tên tài khoản"
+                    name="TenDangNhap"
+                    placeholder="Tên đăng nhập"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                     value={formData.tenTaiKhoan}
                     onChange={handleInput}
                   />
                   <input
                     type="text"
-                    name="hoTen"
+                    name="HoTen"
                     placeholder="Họ tên"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                     value={formData.hoTen}
@@ -184,7 +187,7 @@ export default function AccountUI({
                   />
                   <input
                     type="password"
-                    name="matKhau"
+                    name="MatKhau"
                     placeholder="Mật khẩu"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                     value={formData.matKhau}
@@ -197,9 +200,9 @@ export default function AccountUI({
                     onChange={handleInput}
                   >
                     <option value="">-- Chọn loại tài khoản --</option>
-                    {loaiTaiKhoans.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.tenLoai}
+                    {loaiTaiKhoans.map((loai) => (
+                      <option key={loai.id} value={loai.id}>
+                        {loai.name}
                       </option>
                     ))}
                   </select>
