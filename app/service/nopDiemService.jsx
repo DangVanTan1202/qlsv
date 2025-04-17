@@ -65,31 +65,49 @@ export const fetchSinhViensByLop = async (idLopHoc) => {
   
 // Gửi điểm cho sinh viên
 export const submitDiem = async ({ idSinhVien, idMonHoc, diem, idGiangVien }) => {
-  try {
-    const res = await fetch(`${API_BASE}/DiemSoes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify({
-        idSinhVien,
-        idMonHoc,
-        diem,
-        idGiangVien,
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error("Không thể gửi điểm");
+    try {
+      // 1. Kiểm tra điểm đã có chưa
+      const checkRes = await fetch(
+        `${API_BASE}/DiemSoes?$filter=idSinhVien eq ${idSinhVien} and idMonHoc eq ${idMonHoc}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+  
+      const checkData = await checkRes.json();
+  
+      if (checkData.value.length > 0) {
+        // Đã có điểm rồi => Không gửi nữa
+        throw new Error("Sinh viên này đã có điểm cho môn học này.");
+      }
+      // 2. Gửi điểm nếu chưa có
+      const res = await fetch(`${API_BASE}/DiemSoes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({
+          idSinhVien,
+          idMonHoc,
+          diem,
+          idGiangVien,
+        }),
+      });
+  
+      if (!res.ok) {
+        throw new Error("Không thể gửi điểm");
+      }
+  
+      return await res.json();
+    } catch (error) {
+      console.error("Lỗi gửi điểm:", error.message);
+      throw error;
     }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Lỗi gửi điểm:", error);
-    throw error;
-  }
-};
+  };
+  
 
 // Lấy danh sách chức năng
 export const fetchChucNangs = async (setChucNangs) => {
@@ -105,7 +123,6 @@ export const fetchChucNangs = async (setChucNangs) => {
     console.error("Lỗi fetch chức năng:", error);
   }
 };
-
 // Lấy danh sách phân quyền theo loại tài khoản
 export const fetchPhanQuyenByLoaiTK = async (idLoaiTK, setPhanQuyenList) => {
     if (!idLoaiTK) {

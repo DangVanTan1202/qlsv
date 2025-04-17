@@ -84,15 +84,42 @@ export default function Page() {
     loadData();
   }, []);
   const handleLopChange = async (lopId) => {
-    console.log("📥 Đang lấy SV cho lớp:", lopId);
+    console.log(" Đang lấy SV cho lớp:", lopId);
     const data = await fetchSinhViensByLop(lopId, setSinhViens );
-    console.log("📋 Danh sách SV nhận được:", data);
+    console.log(" Danh sách SV nhận được:", data);
     setSinhViens(data);
   };
   const handleSubmit = async (dsDiem) => {
-    await Promise.all(dsDiem.map((d) => submitDiem(d)));
-    alert("✅ Nộp điểm thành công!");
+    let successCount = 0;
+    let errorMessages = [];
+  
+    for (const d of dsDiem) {
+      try {
+        await submitDiem(d);
+        successCount++;
+      } catch (error) {
+        // ✅ Tìm mã sinh viên từ danh sách sinh viên
+        const sv = sinhViens.find((s) => s.id === d.idSinhVien);
+        const maSinhVien = sv?.maSinhVien || `ID ${d.idSinhVien}`;
+        errorMessages.push(`mã sinh viên ${maSinhVien}: ${error.message}`);
+      }
+    }
+  
+    // ✅ Thông báo tổng kết
+    if (successCount > 0) {
+      alert(`✅ Đã nộp điểm cho ${successCount} sinh viên.`);
+    }
+  
+    if (errorMessages.length > 0) {
+      alert(
+        `⚠️ Một số sinh viên đã có điểm và không được ghi lại:\n\n${errorMessages.join(
+          "\n"
+        )}`
+      );
+    }
   };
+  
+  
   return (
     <NopDiemUI
       user={user}

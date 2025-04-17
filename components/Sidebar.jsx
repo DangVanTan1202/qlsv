@@ -21,9 +21,7 @@ export default function Sidebar({ user }) {
     if (!user || !user.LoaiTK_Name) return items;
     switch (user.LoaiTK_Name.toLowerCase()) {
       case "sinh viên":
-        items.push({ name: "Môn học đã đăng ký", icon: <Book />, path: "/student/monhoc" });
-        items.push({ name: "Điểm số cá nhân", icon: <BarChart2 />, path: "/student/xemdiem" });
-        items.push({ name: "Lịch học", icon: <Users />, path: "/student/lich" });
+        items.push({ name: "Điểm số cá nhân", icon: <BarChart2 />, path: "/sinhvien/xemdiem" });
         break;
       case "giảng viên":
         items.push({ name: "Quản lý sinh viên", icon: <Users />, path: "/teacher/qlsv" });
