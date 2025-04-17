@@ -60,7 +60,7 @@ export default function Page() {
       setUser(parsedUser); 
       console.log(" ID giảng viên trong user:", parsedUser.GiangVien?.id);
       const monHocData = await fetchMonHocsByGiangVien(parsedUser.GiangVien?.id);
-      console.log("📚 Môn học tìm thấy:", monHocData);
+      console.log(" Môn học tìm thấy:", monHocData);
       setMonHocs(monHocData);
 
       const quyenData = await new Promise((resolve) =>
@@ -98,16 +98,16 @@ export default function Page() {
         await submitDiem(d);
         successCount++;
       } catch (error) {
-        // ✅ Tìm mã sinh viên từ danh sách sinh viên
+        //  Tìm mã sinh viên từ danh sách sinh viên
         const sv = sinhViens.find((s) => s.id === d.idSinhVien);
         const maSinhVien = sv?.maSinhVien || `ID ${d.idSinhVien}`;
         errorMessages.push(`mã sinh viên ${maSinhVien}: ${error.message}`);
       }
     }
   
-    // ✅ Thông báo tổng kết
+    // Thông báo tổng kết
     if (successCount > 0) {
-      alert(`✅ Đã nộp điểm cho ${successCount} sinh viên.`);
+      alert(` Đã nộp điểm cho ${successCount} sinh viên.`);
     }
   
     if (errorMessages.length > 0) {

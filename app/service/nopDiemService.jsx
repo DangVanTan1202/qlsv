@@ -55,7 +55,7 @@ export const fetchSinhViensByLop = async (idLopHoc) => {
         })
       );
   
-      console.log("🎓 Sinh viên với họ tên:", sinhViensWithNames);
+      console.log(" Sinh viên với họ tên:", sinhViensWithNames);
       return sinhViensWithNames; // Trả về sinh viên với thông tin họ tên
     } catch (error) {
       console.error("Lỗi fetch SinhViens:", error);

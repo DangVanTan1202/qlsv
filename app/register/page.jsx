@@ -12,7 +12,6 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const router = useRouter();
-
   const getAvatarSrc = () => {
     const tenTaikhoanLength = form.TenDangNhap.length;
     const hoTenLength = form.HoTen.length;
@@ -65,8 +64,6 @@ export default function Register() {
       alert("Có lỗi xảy ra khi gửi yêu cầu!");
     }
   };
-  
-
   return (
     <div className="relative w-full h-screen flex flex-col items-center justify-center bg-gradient-to-b from-yellow-300 to-orange-500">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/daihoc.webp')" }}></div>

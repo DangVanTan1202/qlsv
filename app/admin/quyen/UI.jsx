@@ -51,8 +51,6 @@ export default function RoleUI({
       value: false
     });
   };
-  
-
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800 font-sans">
     <Sidebar user={user} />
