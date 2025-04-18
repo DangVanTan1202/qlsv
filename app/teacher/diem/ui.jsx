@@ -73,7 +73,8 @@ export default function NopDiemUI({
             {selectedLop && (
               <div className="bg-white p-6 rounded-xl shadow-lg border border-purple-200">
                 <h3 className="text-xl font-semibold mb-4">
-                  Danh sách sinh viên lớp {monHocs.find(m => m.id == selectedMonHoc)?.LopHoc?.TenLop}
+                  Danh sách sinh viên lớp
+                   {monHocs.find(m => m.id == selectedMonHoc)?.LopHoc?.TenLop}
                 </h3>
                 <table className="w-full text-left border border-gray-200">
                   <thead>

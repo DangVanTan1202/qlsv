@@ -10,16 +10,23 @@ export default function DuyetDiemUI({
   monHocs,
   sinhViens,
   permissions,
-  onMonHocChange,
+  onLopChange,
   onDuyet,
   onTuChoi,
 }) {
   const [selectedMonHoc, setSelectedMonHoc] = useState("");
-
+  const [selectedLop, setSelectedLop] = useState("");
+  const [dsDiem, setDsDiem] = useState([]);
   const handleSelectMonHoc = (e) => {
     const id = e.target.value;
     setSelectedMonHoc(id);
-    onMonHocChange(id);
+    const mon = monHocs.find((m) => m.id == id);
+    if (mon) {
+      setSelectedLop(mon.LopHoc.id);
+      console.log("🔍 Lớp được chọn:", mon.LopHoc.id);
+      onLopChange(mon.LopHoc.id);
+      setDsDiem([]);
+    }
   };
 
   return (
@@ -48,12 +55,11 @@ export default function DuyetDiemUI({
               </select>
             </div>
 
-            {selectedMonHoc && (
+            {selectedLop && (
               <div className="bg-white p-6 rounded-xl shadow-lg border border-purple-200">
                 <h3 className="text-xl font-semibold mb-4">
-                  Danh sách sinh viên lớp {
-                    monHocs.find(m => m.id == selectedMonHoc)?.LopHoc?.TenLop
-                  }
+                  Danh sách sinh viên lớp
+                   {monHocs.find(m => m.id == selectedMonHoc)?.LopHoc?.TenLop }
                 </h3>
                 <table className="w-full text-left border border-gray-200">
                   <thead>
@@ -81,13 +87,12 @@ export default function DuyetDiemUI({
                     ))}
                   </tbody>
                 </table>
-
                 {(permissions.Duyet || permissions.TuChoi) && (
                   <div className="mt-4 flex justify-end space-x-3">
                     {permissions.TuChoi && (
                       <button
                         className="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600 transition font-medium"
-                        onClick={onTuChoi}
+                        onClick={() => onTuChoi(dsDiem)}
                       >
                         Từ chối bảng điểm
                       </button>
@@ -95,7 +100,7 @@ export default function DuyetDiemUI({
                     {permissions.Duyet && (
                       <button
                         className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition font-medium"
-                        onClick={onDuyet}
+                        onClick={() => onDuyet(dsDiem)}
                       >
                         Duyệt bảng điểm
                       </button>

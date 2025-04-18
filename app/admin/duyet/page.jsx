@@ -6,6 +6,7 @@ import DuyetDiemUI from "./ui";
 import {
   fetchAllMonHocs,
   fetchDiemTheoMonHoc,
+  fetchSinhViensByLop,
   duyetBangDiem,
   tuChoiBangDiem,
   fetchPhanQuyenByLoaiTK,
@@ -15,6 +16,7 @@ import {
 export default function Page() {
   const [user, setUser] = useState(null);
   const [monHocs, setMonHocs] = useState([]);
+  const [sinhViens, setSinhViens] = useState([]);
   const [diemList, setDiemList] = useState([]);
   const [selectedMonHoc, setSelectedMonHoc] = useState(null);
   const [permissions, setPermissions] = useState({
@@ -75,6 +77,12 @@ export default function Page() {
     const data = await fetchDiemTheoMonHoc(monHocId);
     setDiemList(data);
   };
+   const handleLopChange = async (lopId) => {
+       console.log(" Đang lấy SV cho lớp:", lopId);
+       const data = await fetchSinhViensByLop(lopId, setSinhViens );
+       console.log(" Danh sách SV nhận được:", data);
+       setSinhViens(data);
+     };
 
   const handleDuyet = async () => {
     if (!selectedMonHoc) return;
@@ -97,6 +105,7 @@ export default function Page() {
       diemList={diemList}
       selectedMonHoc={selectedMonHoc}
       onMonHocChange={handleMonHocChange}
+      onLopChange={handleLopChange}
       permissions={permissions}
       onDuyet={handleDuyet}
       onTuChoi={handleTuChoi}

@@ -6,7 +6,6 @@ const getToken = () => {
   }
   return null;
 };
-
 // 1. Lấy tất cả môn học (gồm lớp học và giảng viên)
 export const fetchAllMonHocs = async () => {
   try {
@@ -25,38 +24,39 @@ export const fetchAllMonHocs = async () => {
 
 // 2. Lấy danh sách sinh viên theo lớp (bao gồm họ tên từ User)
 export const fetchSinhViensByLop = async (idLopHoc) => {
-  try {
-    const res = await fetch(`${API_BASE}/SinhViens?$filter=idLopHoc eq ${idLopHoc}`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const sinhViensData = await res.json();
-    const sinhViens = sinhViensData.value || [];
-
-    const sinhViensWithNames = await Promise.all(
-      sinhViens.map(async (sv) => {
-        const userRes = await fetch(`${API_BASE}/Users?$filter=id eq ${sv.user_id}`, {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        });
-        const userData = await userRes.json();
-        const user = userData.value[0] || {};
-        return {
-          ...sv,
-          hoTen: user.hoTen || "Chưa có họ tên",
-        };
-      })
-    );
-
-    return sinhViensWithNames;
-  } catch (error) {
-    console.error("Lỗi fetch sinh viên theo lớp:", error);
-    return [];
-  }
-};
-
+    try {
+      // Fetch sinh viên theo lớp
+      const res = await fetch(`${API_BASE}/SinhViens?$filter=idLopHoc eq ${idLopHoc}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+      const sinhViensData = await res.json();
+      const sinhViens = sinhViensData.value || [];
+      
+      // Lấy thông tin họ tên từ bảng User cho từng sinh viên
+      const sinhViensWithNames = await Promise.all(
+        sinhViens.map(async (sv) => {
+          const userRes = await fetch(`${API_BASE}/Users?$filter=id eq ${sv.user_id}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
+          const userData = await userRes.json();
+          const user = userData.value[0] || {};
+          return {
+            ...sv,
+            hoTen: user.hoTen || "Chưa có họ tên", // Lấy họ tên hoặc để mặc định nếu không có
+          };
+        })
+      );
+      console.log(" Sinh viên với họ tên:", sinhViensWithNames);
+      return sinhViensWithNames; // Trả về sinh viên với thông tin họ tên
+    } catch (error) {
+      console.error("Lỗi fetch SinhViens:", error);
+      return []; // Nếu có lỗi, trả về mảng rỗng
+    }
+  };
 //  Lấy điểm số của sinh viên theo môn học
 export const fetchDiemTheoMonHoc = async (idMonHoc) => {
   try {
