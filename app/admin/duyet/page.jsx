@@ -103,6 +103,7 @@ export default function Page() {
       handleLogout={handleLogout}
       monHocs={monHocs}
       diemList={diemList}
+      sinhViens={sinhViens}
       selectedMonHoc={selectedMonHoc}
       onMonHocChange={handleMonHocChange}
       onLopChange={handleLopChange}
