@@ -19,8 +19,6 @@ export const fetchMonHocsByGiangVien = async (idGiangVien) => {
       console.log("Danh sách môn học trả về:", data.value);
       console.log("Lọc theo giảng viên ID:", idGiangVien);
       return (data.value || []).filter(mon => mon.GiangVien && String(mon.GiangVien.id) === String(idGiangVien));
-
-      
     } catch (error) {
       console.error("Lỗi fetch MonHocs:", error);
       return [];
@@ -54,12 +52,29 @@ export const fetchSinhViensByLop = async (idLopHoc) => {
           };
         })
       );
-  
       console.log(" Sinh viên với họ tên:", sinhViensWithNames);
       return sinhViensWithNames; // Trả về sinh viên với thông tin họ tên
     } catch (error) {
       console.error("Lỗi fetch SinhViens:", error);
       return []; // Nếu có lỗi, trả về mảng rỗng
+    }
+  };
+  export const getDiemTheoLopVaMon = async (idLopHoc, idMonHoc) => {
+    try {
+      const res = await fetch(
+        `${API_BASE}/DiemSoes?$filter=idMonHoc eq ${idMonHoc} and SinhVien/idLopHoc eq ${idLopHoc}&$expand=SinhVien`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Không thể lấy dữ liệu điểm");
+      const data = await res.json();
+      return data.value;
+    } catch (error) {
+      console.error("Lỗi khi lấy điểm:", error);
+      return [];
     }
   };
   
@@ -75,7 +90,6 @@ export const submitDiem = async ({ idSinhVien, idMonHoc, diem, idGiangVien }) =>
           },
         }
       );
-  
       const checkData = await checkRes.json();
   
       if (checkData.value.length > 0) {
@@ -94,6 +108,7 @@ export const submitDiem = async ({ idSinhVien, idMonHoc, diem, idGiangVien }) =>
           idMonHoc,
           diem,
           idGiangVien,
+          IsDuyet: null, 
         }),
       });
   
