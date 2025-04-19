@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import DuyetDiemUI from "./ui";
 import {
   fetchAllMonHocs,
-  fetchDiemTheoMonHoc,
+  getDiemTheoLopVaMon,
   fetchSinhViensByLop,
   duyetBangDiem,
   tuChoiBangDiem,
@@ -74,16 +74,26 @@ export default function Page() {
 
   const handleMonHocChange = async (monHocId) => {
     setSelectedMonHoc(monHocId);
-    const data = await fetchDiemTheoMonHoc(monHocId);
-    setDiemList(data);
+    const monHoc = monHocs.find((mh) => mh.id === monHocId);
+    const lopId = monHoc?.LopHoc?.id;
+    if (!lopId) return;
+    // Gọi danh sách sinh viên và danh sách điểm
+    const [sinhViens, diemList] = await Promise.all([
+      fetchSinhViensByLop(lopId),
+      getDiemTheoLopVaMon(lopId,monHocId),
+    ]);
+    // Gộp dữ liệu lại theo sinh viên id
+    const mergedData = sinhViens.map((sv) => {
+      const diem = diemList.find((d) => d.idSinhVien === sv.id);
+      return {
+        ...sv,
+        diem: diem?.diem ?? null,
+        IsDuyet: diem?.IsDuyet ?? null,
+      };
+    });
+    setSinhViens(mergedData);
+    setDiemList(diemList); 
   };
-   const handleLopChange = async (lopId) => {
-       console.log(" Đang lấy SV cho lớp:", lopId);
-       const data = await fetchSinhViensByLop(lopId, setSinhViens );
-       console.log(" Danh sách SV nhận được:", data);
-       setSinhViens(data);
-     };
-
   const handleDuyet = async () => {
     if (!selectedMonHoc) return;
     await duyetBangDiem(selectedMonHoc);
@@ -106,7 +116,6 @@ export default function Page() {
       sinhViens={sinhViens}
       selectedMonHoc={selectedMonHoc}
       onMonHocChange={handleMonHocChange}
-      onLopChange={handleLopChange}
       permissions={permissions}
       onDuyet={handleDuyet}
       onTuChoi={handleTuChoi}

@@ -57,21 +57,33 @@ export const fetchSinhViensByLop = async (idLopHoc) => {
       return []; // Nếu có lỗi, trả về mảng rỗng
     }
   };
-//  Lấy điểm số của sinh viên theo môn học
-export const fetchDiemTheoMonHoc = async (idMonHoc) => {
-  try {
-    const res = await fetch(`${API_BASE}/DiemSoes?$filter=idMonHoc eq ${idMonHoc}&$expand=SinhVien`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const data = await res.json();
-    return data.value || [];
-  } catch (error) {
-    console.error("Lỗi fetch điểm theo môn học:", error);
-    return [];
-  }
-};
+//  Lấy điểm số của sinh viên theo môn học và lớp học
+export const getDiemTheoLopVaMon = async (idLopHoc, idMonHoc) => {
+    try {
+      const res = await fetch(
+        `${API_BASE}/DiemSoes?$filter=idMonHoc eq ${idMonHoc} and SinhVien/idLopHoc eq ${idLopHoc}&$expand=SinhVien`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Không thể lấy dữ liệu điểm");
+      const data = await res.json();
+      return data.value.map((d) => ({
+        id: d.id,
+        idSinhVien: d.SinhVien?.id,
+        hoTen: d.SinhVien?.hoTen,
+        maSinhVien: d.SinhVien?.maSinhVien,
+        diem: d.diem,
+        IsDuyet: d.IsDuyet,
+      }));
+      
+    } catch (error) {
+      console.error("Lỗi khi lấy điểm:", error);
+      return [];
+    }
+  };
 //  Duyệt toàn bộ điểm trong danh sách (IsDuyet = true)
 export const duyetBangDiem = async (dsDiem) => {
     try {

@@ -77,7 +77,6 @@ export const fetchSinhViensByLop = async (idLopHoc) => {
       return [];
     }
   };
-  
 // Gửi điểm cho sinh viên
 export const submitDiem = async ({ idSinhVien, idMonHoc, diem, idGiangVien }) => {
     try {
