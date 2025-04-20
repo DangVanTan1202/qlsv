@@ -19,9 +19,7 @@ export default function Page() {
     Xem: false,
     Nop: false,
   });
-
   const router = useRouter();
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -69,7 +67,6 @@ export default function Page() {
       const chucNangData = await new Promise((resolve) =>
         fetchChucNangs(resolve)
       );
-
       const chucNangNopDiem = chucNangData.find(
         (c) => c.code === "QLDS"
       );

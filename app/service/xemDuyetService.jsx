@@ -84,46 +84,6 @@ export const getDiemTheoLopVaMon = async (idLopHoc, idMonHoc) => {
       return [];
     }
   };
-//  Duyệt toàn bộ điểm trong danh sách (IsDuyet = true)
-export const duyetBangDiem = async (dsDiem) => {
-    try {
-      await Promise.all(
-        dsDiem.map((d) =>
-          fetch(`${API_BASE}/DiemSoes(${d.id})`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${getToken()}`,
-            },
-            body: JSON.stringify({ IsDuyet: true }),
-          })
-        )
-      );
-    } catch (error) {
-      console.error("Lỗi duyệt bảng điểm:", error);
-      throw error;
-    }
-  };
-  //  Từ chối toàn bộ điểm trong danh sách (IsDuyet = false)
-  export const tuChoiBangDiem = async (dsDiem) => {
-    try {
-      await Promise.all(
-        dsDiem.map((d) =>
-          fetch(`${API_BASE}/DiemSoes(${d.id})`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${getToken()}`,
-            },
-            body: JSON.stringify({ IsDuyet: false }),
-          })
-        )
-      );
-    } catch (error) {
-      console.error("Lỗi từ chối bảng điểm:", error);
-      throw error;
-    }
-  };
   // 3 Xóa điểm của lớp và môn học khi bị từ chối
 export const xoaBangDiem = async (idLopHoc, idMonHoc) => {
     try {
@@ -172,18 +132,18 @@ export const fetchChucNangs = async (setChucNangs) => {
     console.error("Lỗi fetch chức năng:", error);
   }
 };
-// Lấy danh sách phân quyền theo loại tài khoản
-export const fetchPhanQuyenByLoaiTK = async (idLoaiTK, setPhanQuyenList) => {
-  try {
-    const res = await fetch(`${API_BASE}/PhanQuyen_LoaiTK?$filter=IdLoaiTK eq ${idLoaiTK}`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`
-      }
-    });
-    const data = await res.json();
-    setPhanQuyenList(data.value || []);
-  } catch (error) {
-    console.error("Lỗi fetch phân quyền:", error);
-  }
-};
+ export const fetchPhanQuyenByLoaiTK = async (idLoaiTK, setPhanQuyenList) => {
+    try {
+      const res = await fetch(`${API_BASE}/PhanQuyen_LoaiTK?$filter=IdLoaiTK eq ${idLoaiTK}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
+      });
+      const data = await res.json();
+      setPhanQuyenList(data.value || []);
+    } catch (error) {
+      console.error("Lỗi fetch phân quyền:", error);
+    }
+  };
+  
   

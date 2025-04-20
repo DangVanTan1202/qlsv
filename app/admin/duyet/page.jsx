@@ -12,7 +12,6 @@ import {
   fetchPhanQuyenByLoaiTK,
   fetchChucNangs,
 } from "../../service/duyetDiemService";
-
 export default function Page() {
   const [user, setUser] = useState(null);
   const [monHocs, setMonHocs] = useState([]);
@@ -24,7 +23,6 @@ export default function Page() {
     Duyet: false,
     TuChoi: false,
   });
-
   const router = useRouter();
 
   const handleLogout = () => {
@@ -39,7 +37,6 @@ export default function Page() {
       router.push("/login");
       return;
     }
-
     const parsedUser = JSON.parse(storedUser);
     if (![ "Admin"].includes(parsedUser.LoaiTK_Name)) {
       router.push("/login");
@@ -95,18 +92,19 @@ export default function Page() {
     setDiemList(diemList); 
   };
   const handleDuyet = async () => {
-    if (!selectedMonHoc) return;
-    await duyetBangDiem(selectedMonHoc);
-    alert("✅ Bảng điểm đã được duyệt.");
+    if (!selectedMonHoc || diemList.length === 0) return;
+    await duyetBangDiem(diemList);
+    alert(" Bảng điểm đã được duyệt.");
     handleMonHocChange(selectedMonHoc); // reload lại dữ liệu
   };
-
+  
   const handleTuChoi = async () => {
-    if (!selectedMonHoc) return;
-    await tuChoiBangDiem(selectedMonHoc);
-    alert("❌ Bảng điểm đã bị từ chối.");
+    if (!selectedMonHoc || diemList.length === 0) return;
+    await tuChoiBangDiem(diemList);
+    alert(" Bảng điểm đã bị từ chối.");
     handleMonHocChange(selectedMonHoc); // reload lại dữ liệu
   };
+  
   return (
     <DuyetDiemUI
       user={user}

@@ -26,7 +26,7 @@ export default function Sidebar({ user }) {
       case "giảng viên":
         items.push({ name: "Quản lý sinh viên", icon: <Users />, path: "/teacher/qlsv" });
         items.push({ name: "Chấm điểm sinh viên", icon: <BarChart2 />, path: "/teacher/diem" });
-        items.push({ name: "Thông báo", icon: <Book />, path: "/teacher/thongbao" });
+        items.push({ name: "Thông báo", icon: <Book />, path: "/teacher/thongBaoTinhTrang" });
         break;
       case "admin":
         items.push({ name: "Quản lý tài khoản", icon: <Users />, path: "/admin/accounts" });

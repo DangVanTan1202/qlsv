@@ -144,7 +144,6 @@ export const fetchPhanQuyenByLoaiTK = async (idLoaiTK, setPhanQuyenList) => {
       setPhanQuyenList([]); // reset nếu cần
       return;
     }
-  
     try {
       const res = await fetch(
         `http://qltruonghoc.ddns.net/odata/PhanQuyen_LoaiTK?$filter=IdLoaiTK eq ${idLoaiTK}`,
