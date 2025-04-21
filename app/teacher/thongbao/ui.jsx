@@ -6,47 +6,55 @@ import Header from "@/components/Header";
 
 export default function ThongBaoUI({
   user,
+  handleLogout,
   monHocs,
-  selectedMonHoc,
   sinhViens,
   onMonHocChange,
   onNhapLai,
   permissions,
 }) {
-  const [selectedId, setSelectedId] = useState("");
-
-  const handleChange = (e) => {
+  const [selectedMonHoc, setSelectedMonHoc] = useState("");
+  const [selectedLop, setSelectedLop] = useState("");
+  const handleSelectMonHoc = (e) => {
     const id = e.target.value;
-    setSelectedId(id);
-    onMonHocChange(id);
+    setSelectedMonHoc(id);
+    const mon = monHocs.find((m) => m.id == id);
+    if (mon) {
+      setSelectedLop(mon.LopHoc.id);
+      onMonHocChange(mon.id);
+    }
   };
+  const isBangDiemTuChoi = sinhViens?.some((sv) => sv.IsDuyet === false);
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100">
       <Sidebar user={user} />
       <div className="flex-1 p-6">
-        <Header user={user} />
+        <Header user={user}  onLogout={handleLogout} />
         <h2 className="text-3xl font-bold text-orange-600 mb-6">
           Thông báo bảng điểm
         </h2>
-        {permissions.Xem ? (
           <>
-            <select
-              value={selectedId}
-              onChange={handleChange}
-              className="p-3 border border-orange-400 rounded-md w-full mb-6 bg-white text-gray-700"
-            >
-              <option value="">-- Chọn môn học --</option>
-              {monHocs.map((mh) => (
-                <option key={mh.id} value={mh.id}>
-                  {mh.maMonHoc} - {mh.tenMonHoc} ({mh.LopHoc?.TenLop})
-                </option>
-              ))}
-            </select>
+             <div className="space-y-8 p-6 border-pink-200 mb-10">
+              <select
+                className="p-3 border border-orange-300 rounded-md w-full bg-white text-gray-700 focus:ring-2 focus:ring-orange-400 transition"
+                value={selectedMonHoc}
+                onChange={handleSelectMonHoc}
+              >
+                <option value="">-- Chọn môn học --</option>
+                {monHocs.map((mh) => (
+                  <option key={mh.id} value={mh.id}>
+                    {mh.maMonHoc} - {mh.tenMonHoc} ({mh.LopHoc?.TenLop}) - GV:{" "}
+                    {mh.GiangVien?.hoTen}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            {selectedMonHoc && (
+            {selectedLop && (
               <div className="bg-white p-6 rounded-xl shadow-md border">
                 <h3 className="text-xl font-semibold mb-4 text-gray-700">
-                  Danh sách sinh viên lớp {selectedMonHoc?.LopHoc?.TenLop}
+                  Danh sách sinh viên lớp 
+                  {monHocs.find((m) => m.id == selectedMonHoc)?.LopHoc?.TenLop}
                 </h3>
                 <table className="w-full border border-gray-300 text-left">
                   <thead className="bg-orange-100">
@@ -74,11 +82,11 @@ export default function ThongBaoUI({
                     ))}
                   </tbody>
                 </table>
-                {sinhViens.length > 0 && sinhViens.some((sv) => sv.IsDuyet === false) && (
-                  <div className="mt-6 text-right">
+                {isBangDiemTuChoi && (
+                  <div className="mt-5 text-right">
                     <button
                       onClick={onNhapLai}
-                      className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-md"
+                      className="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600 transition"
                     >
                       Nhập lại bảng điểm
                     </button>
@@ -87,11 +95,7 @@ export default function ThongBaoUI({
               </div>
             )}
           </>
-        ) : (
-          <div className="text-center text-red-600 font-bold mt-10">
-            Bạn không có quyền xem trang này.
-          </div>
-        )}
+       
       </div>
     </div>
   );

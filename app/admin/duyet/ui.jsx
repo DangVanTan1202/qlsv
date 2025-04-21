@@ -34,7 +34,6 @@ export default function DuyetDiemUI({
         <h2 className="text-4xl font-bold text-orange-600 mb-8">
           Duyệt bảng điểm môn học
         </h2>
-
         {permissions.Xem ? (
           <>
             <div className="space-y-8 p-6 border-pink-200 mb-10">

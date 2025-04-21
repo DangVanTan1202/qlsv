@@ -125,9 +125,14 @@ export const duyetBangDiem = async (dsDiem) => {
     }
   };
   // 3 Xóa điểm của lớp và môn học khi bị từ chối
-export const xoaBangDiem = async (idLopHoc, idMonHoc) => {
+  export const xoaBangDiem = async (idLopHoc, idMonHoc) => {
+    if (!idLopHoc || !idMonHoc) {
+      console.error("Thiếu idLopHoc hoặc idMonHoc");
+      throw new Error("Thiếu idLopHoc hoặc idMonHoc");
+    }
+  
     try {
-      // Fetch danh sách điểm cần xóa
+      // Lấy danh sách các bản ghi điểm liên quan
       const res = await fetch(
         `${API_BASE}/DiemSoes?$filter=idMonHoc eq ${idMonHoc} and SinhVien/idLopHoc eq ${idLopHoc}&$expand=SinhVien`,
         {
@@ -136,19 +141,24 @@ export const xoaBangDiem = async (idLopHoc, idMonHoc) => {
           },
         }
       );
+  
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Lỗi khi fetch danh sách điểm:", error);
+        throw new Error("Không thể lấy danh sách điểm");
+      }
+  
       const data = await res.json();
       const dsDiem = data.value || [];
   
-      // Xoá từng điểm (set diem = null, IsDuyet = null)
+      // Xoá từng bản ghi điểm
       await Promise.all(
         dsDiem.map((d) =>
           fetch(`${API_BASE}/DiemSoes(${d.id})`, {
-            method: "PATCH",
+            method: "DELETE",
             headers: {
-              "Content-Type": "application/json",
               Authorization: `Bearer ${getToken()}`,
             },
-            body: JSON.stringify({ diem: null, IsDuyet: null }),
           })
         )
       );

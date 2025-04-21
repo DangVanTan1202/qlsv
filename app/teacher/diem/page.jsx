@@ -101,12 +101,11 @@ export default function Page() {
         errorMessages.push(`mã sinh viên ${maSinhVien}: ${error.message}`);
       }
     }
-  
     // Thông báo tổng kết
     if (successCount > 0) {
       alert(` Đã nộp điểm cho ${successCount} sinh viên.`);
     }
-  
+
     if (errorMessages.length > 0) {
       alert(
         `⚠️ Một số sinh viên đã có điểm và không được ghi lại:\n\n${errorMessages.join(
