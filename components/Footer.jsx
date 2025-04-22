@@ -1,3 +1,4 @@
+"use client"
 import { Mail, Phone, Facebook, Youtube } from "lucide-react";
 
 const Footer = () => {

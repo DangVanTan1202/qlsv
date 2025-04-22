@@ -95,7 +95,7 @@ export default function SinhVienUI({
                   });
                 }}
               >
-                <PlusCircle size={18} /> thêm sinh viên
+                <PlusCircle size={18} /> cập nhật thông tin sinh viên
               </button>
             )}
           </div>

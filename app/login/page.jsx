@@ -58,14 +58,14 @@ export default function Login() {
       setError(err.message);
     }
   };
-  
 return (
     <div className="relative w-full h-screen flex flex-col bg-gradient-to-b from-yellow-300 to-orange-500">
       <div className="absolute inset-0 bg-cover bg-center " style={{ backgroundImage: "url('/daihoc.webp')" }}></div>
       <header className="w-full bg-red-700 text-white shadow-md py-4 px-8 flex justify-between items-center fixed top-0 z-10">
         <h1 className="text-2xl font-bold">Hệ Thống Quản Lý Sinh Viên</h1>
         <nav className="space-x-6">
-          <Button variant="ghost" className="text-white" onClick={() => router.push("/contact")}>Liên Hệ hỗ trợ</Button>
+        <Button variant="ghost" className="text-white" onClick={() => router.push("/homePage")}>Home</Button>
+        <Button variant="ghost" className="text-white" onClick={() => router.push("/contact")}>Liên Hệ</Button>
         </nav>
       </header>
       <div className="flex flex-grow mt-20 relative z-10 px-4">

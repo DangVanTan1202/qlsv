@@ -11,7 +11,7 @@ export default function ThongBaoUI({
   sinhViens,
   onMonHocChange,
   onNhapLai,
-  permissions,
+ // permissions,
 }) {
   const [selectedMonHoc, setSelectedMonHoc] = useState("");
   const [selectedLop, setSelectedLop] = useState("");
@@ -33,6 +33,7 @@ export default function ThongBaoUI({
         <h2 className="text-3xl font-bold text-orange-600 mb-6">
           Thông báo bảng điểm
         </h2>
+        {/* {permissions.Xem ? ( */}
           <>
              <div className="space-y-8 p-6 border-pink-200 mb-10">
               <select
@@ -95,7 +96,11 @@ export default function ThongBaoUI({
               </div>
             )}
           </>
-       
+        {/* // ) : (
+        //   <div className="text-center text-red-600 font-bold mt-10">
+        //     Bạn không có quyền xem trang này.
+        //   </div>
+        // )} */}
       </div>
     </div>
   );

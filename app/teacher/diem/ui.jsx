@@ -92,6 +92,8 @@ export default function NopDiemUI({
                         <td className="p-0">
                           <input
                             type="number"
+                            min={1}
+                            max={10}
                             className="input input-bordered w-28 px-4 py-2 text-lg rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all"
                             onChange={(e) =>
                               handleInputChange(sv.id, e.target.value)

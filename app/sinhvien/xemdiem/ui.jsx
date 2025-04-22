@@ -15,7 +15,6 @@ export default function XemDiemUI({ user, handleLogout, data, permissions }) {
       (item.tenGiangVien?.toLowerCase() || "").includes(keyword)
     );
   });
-  
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-yellow-50 via-pink-100 to-purple-100 text-gray-900 font-sans">
       <Sidebar user={user} />

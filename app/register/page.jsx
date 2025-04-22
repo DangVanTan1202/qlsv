@@ -70,7 +70,8 @@ export default function Register() {
       <header className="w-full bg-red-700 text-white shadow-md py-4 px-8 flex justify-between items-center fixed top-0 z-10">
         <h1 className="text-2xl font-bold">Hệ Thống Quản Lý Sinh Viên</h1>
         <nav className="space-x-6">
-          <Button variant="ghost" className="text-white" onClick={() => router.push("/contact")}>Liên Hệ hỗ trợ</Button>
+          <Button variant="ghost" className="text-white" onClick={() => router.push("/homePage")}>Home</Button>
+         <Button variant="ghost" className="text-white" onClick={() => router.push("/contact")}>Liên Hệ</Button>
         </nav>
       </header>
       <motion.div 

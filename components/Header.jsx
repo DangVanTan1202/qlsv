@@ -19,7 +19,6 @@ export default function Header({ user, onLogout }) {
           </div>
           <div>
             <p className="font-bold text-lg"> {user.HoTen}</p>
-  
           </div>
         </div>
       ) : (
